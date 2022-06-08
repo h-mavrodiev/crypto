@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/h-mavrodiev/crypto/client"
+	client "crypto/pkg/client"
 )
 
 const (

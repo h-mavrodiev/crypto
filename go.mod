@@ -1,3 +1,3 @@
-module github.com/h-mavrodiev/crypto
+module crypto
 
 go 1.17
