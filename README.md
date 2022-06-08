@@ -1,2 +1,2 @@
-# crypto
-arbitrage crypto bot
+# arbiter
+arbitrage  bot
