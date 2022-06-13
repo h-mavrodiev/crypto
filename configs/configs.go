@@ -5,10 +5,12 @@ import (
 )
 
 type GateConfig struct {
-	Host          string        `yaml:"host"`
-	Prefix        string        `yaml:"prefix"`
-	APIKey        string        `yaml:"apiKey"`
-	GateEndpoints GateEndpoints `yaml:"gate-endpoints"`
+	Host          string            `yaml:"host"`
+	Prefix        string            `yaml:"prefix"`
+	APIKey        string            `yaml:"apiKey"`
+	APISecret     string            `yaml:"apiSecret"`
+	CommonHeaders GateCommonHeaders `yaml:"commonHeaders"`
+	GateEndpoints GateEndpoints     `yaml:"gateEndpoints"`
 }
 
 type GateEndpoints struct {
@@ -17,11 +19,15 @@ type GateEndpoints struct {
 	Margin string `yaml:"margin"`
 }
 
+type GateCommonHeaders struct {
+	Accept      string `json:"Accept"`
+	ContetnType string `json:"Content-Type"`
+}
+
 type StexConfig struct {
 	Host          string        `yaml:"host"`
-	Prefix        string        `yaml:"prefix"`
 	APIKey        string        `yaml:"apiKey"`
-	StexEndpoints StexEndpoints `yaml:"stex-endpoints"`
+	StexEndpoints StexEndpoints `yaml:"stexEndpoints"`
 }
 
 type StexEndpoints struct {
@@ -37,14 +43,13 @@ type Config struct {
 
 var vp *viper.Viper
 
-func LoadConfig() (Config, error) {
+func LoadConfig(cn string, ct string, cp string) (Config, error) {
 	vp = viper.New()
 	var config Config
 
-	vp.SetConfigName("config")
-	vp.SetConfigType("yml")
-	vp.AddConfigPath("./configs")
-	vp.AddConfigPath(".")
+	vp.SetConfigName(cn)
+	vp.SetConfigType(ct)
+	vp.AddConfigPath(cp)
 	err := vp.ReadInConfig()
 	if err != nil {
 		return Config{}, err

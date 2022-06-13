@@ -53,16 +53,14 @@ func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 // Client struct
 type StexClient struct {
 	Host       string
-	Prefix     string
 	Endpoints  configs.StexEndpoints
 	ApiKey     string
 	HTTPClient *http.Client
 }
 
-func NewClient(host string, prefix string, apiKey string, endpoints configs.StexEndpoints) *StexClient {
+func NewClient(host string, apiKey string, endpoints configs.StexEndpoints) *StexClient {
 	return &StexClient{
 		Host:      host,
-		Prefix:    prefix,
 		Endpoints: endpoints,
 		ApiKey:    apiKey,
 		HTTPClient: &http.Client{

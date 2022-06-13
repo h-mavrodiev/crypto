@@ -14,12 +14,7 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-type successResponse struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"data"`
-}
-
-func (c *GateClient) SendRequest(req *http.Request, v interface{}) error {
+func (c *GateClient) SendRequest(req *http.Request, target interface{}) error {
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return err
@@ -38,12 +33,7 @@ func (c *GateClient) SendRequest(req *http.Request, v interface{}) error {
 
 	}
 
-	// Unmarshall and populate v
-	fullResponse := successResponse{
-		Data: v,
-	}
-
-	if err = json.NewDecoder(res.Body).Decode(&fullResponse); err != nil {
+	if err = json.NewDecoder(res.Body).Decode(&target); err != nil {
 		return err
 	}
 
@@ -52,21 +42,26 @@ func (c *GateClient) SendRequest(req *http.Request, v interface{}) error {
 
 // Client struct
 type GateClient struct {
-	Host       string
-	Prefix     string
-	Endpoints  configs.GateEndpoints
-	ApiKey     string
-	HTTPClient *http.Client
+	Host          string
+	Prefix        string
+	Endpoints     configs.GateEndpoints
+	CommonHeaders configs.GateCommonHeaders
+	ApiKey        string
+	ApiSecret     string
+	HTTPClient    *http.Client
 }
 
-func NewClient(host string, prefix string, apiKey string, endpoints configs.GateEndpoints) *GateClient {
-	return &GateClient{
-		Host:      host,
-		Prefix:    prefix,
-		Endpoints: endpoints,
-		ApiKey:    apiKey,
+func NewClient(host string, prefix string, endpoints configs.GateEndpoints, headers configs.GateCommonHeaders, apiKey string, apiSecret string) (*GateClient, error) {
+	client := &GateClient{
+		Host:          host,
+		Prefix:        prefix,
+		Endpoints:     endpoints,
+		CommonHeaders: headers,
+		ApiKey:        apiKey,
+		ApiSecret:     apiSecret,
 		HTTPClient: &http.Client{
 			Timeout: time.Minute,
 		},
 	}
+	return client, nil
 }

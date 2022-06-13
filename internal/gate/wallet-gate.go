@@ -14,14 +14,51 @@ type CurrencyChain []struct {
 }
 
 // Send Get reuquest to the List Chains Gate enpoint
-func (c *GateClient) GetListChains() (*CurrencyChain, error) {
-	url := (c.Host + c.Prefix + c.Endpoints.Wallet + "/currency_chains")
-	req, err := http.NewRequest("GET", url, nil)
+func (c *GateClient) GetListChains(query string) (*CurrencyChain, error) {
+	url := (c.Host + c.Prefix + c.Endpoints.Wallet + "/currency_chains" + "?" + query)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+
+	// h, err := c.GenSign("", "", "", "")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// req.Header.Add(h)
+
 	if err != nil {
 		return nil, err
 	}
-
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
 	res := CurrencyChain{}
+	if err := c.SendRequest(req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+type WithdrawalRecords []struct {
+	ID        string `json:"id"`
+	Timestamp string `json:"timestamp"`
+	Currency  string `json:"currency"`
+	Address   string `json:"address"`
+	Txid      string `json:"txid"`
+	Amount    string `json:"amount"`
+	Memo      string `json:"memo"`
+	Status    string `json:"status"`
+	Chain     string `json:"chain"`
+}
+
+func (c *GateClient) GetRetrieveWithdrawalRecords(query string) (*WithdrawalRecords, error) {
+	url := (c.Host + c.Prefix + c.Endpoints.Wallet + "/withdrawals")
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept", c.CommonHeaders.Accept)
+	req.Header.Add("Content-Type", c.CommonHeaders.ContetnType)
+
+	res := WithdrawalRecords{}
 	if err := c.SendRequest(req, &res); err != nil {
 		return nil, err
 	}
