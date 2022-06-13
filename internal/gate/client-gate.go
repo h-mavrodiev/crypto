@@ -14,7 +14,10 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-func (c *GateClient) SendRequest(req *http.Request, target interface{}) error {
+func (c *GateClient) SendRequest(
+	req *http.Request,
+	target interface{}) error {
+
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return err
@@ -51,7 +54,13 @@ type GateClient struct {
 	HTTPClient    *http.Client
 }
 
-func NewClient(host string, prefix string, endpoints configs.GateEndpoints, headers configs.GateCommonHeaders, apiKey string, apiSecret string) (*GateClient, error) {
+func NewClient(
+	host string,
+	prefix string,
+	endpoints configs.GateEndpoints,
+	headers configs.GateCommonHeaders,
+	apiKey string, apiSecret string) (*GateClient, error) {
+
 	client := &GateClient{
 		Host:          host,
 		Prefix:        prefix,

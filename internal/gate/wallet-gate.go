@@ -18,12 +18,6 @@ func (c *GateClient) GetListChains(query string) (*CurrencyChain, error) {
 	url := (c.Host + c.Prefix + c.Endpoints.Wallet + "/currency_chains" + "?" + query)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 
-	// h, err := c.GenSign("", "", "", "")
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// req.Header.Add(h)
-
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +43,8 @@ type WithdrawalRecords []struct {
 }
 
 func (c *GateClient) GetRetrieveWithdrawalRecords(query string) (*WithdrawalRecords, error) {
-	url := (c.Host + c.Prefix + c.Endpoints.Wallet + "/withdrawals")
+	resourse := "/withdrawals"
+	url := (c.Host + c.Prefix + c.Endpoints.Wallet + resourse)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 
 	if err != nil {
@@ -57,6 +52,10 @@ func (c *GateClient) GetRetrieveWithdrawalRecords(query string) (*WithdrawalReco
 	}
 	req.Header.Add("Accept", c.CommonHeaders.Accept)
 	req.Header.Add("Content-Type", c.CommonHeaders.ContetnType)
+
+	if err := c.SignReq(req, http.MethodGet, resourse, "", ""); err != nil {
+		return nil, err
+	}
 
 	res := WithdrawalRecords{}
 	if err := c.SendRequest(req, &res); err != nil {

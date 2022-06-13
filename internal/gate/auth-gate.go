@@ -2,6 +2,7 @@ package gate
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -11,17 +12,25 @@ type SignHeader struct {
 	Sign      string `json:"SIGN"`
 }
 
-func (c *GateClient) GenSign(ep string,
+func (c *GateClient) SignReq(
+	req *http.Request,
 	method string,
+	apiRes string,
 	queryString string,
-	payloadString string) (*SignHeader, error) {
+	payloadString string) error {
 
 	timestamp := time.Now().String()
 	//Request Method + "\n" + Request URL + "\n" + Query String + "\n" + HexEncode(SHA512(Request Payload)) + "\n" + Timestamp
-	s := fmt.Sprintf("%s\n%s\n%s\n%s\n%s", method, (c.Host + c.Prefix + ep), queryString, payloadString, timestamp)
-
-	return &SignHeader{Key: c.ApiKey,
+	s := fmt.Sprintf("%s\n%s\n%s\n%s\n%s", method, (c.Prefix + c.Endpoints.Wallet + apiRes), queryString, payloadString, timestamp)
+	heads := &SignHeader{
+		Key:       c.ApiKey,
 		Timestamp: timestamp,
-		Sign:      s}, nil
+		Sign:      s,
+	}
+
+	req.Header.Add("KEY", heads.Key)
+	req.Header.Add("Timestamp", heads.Timestamp)
+	req.Header.Add("SIGN", heads.Sign)
+	return nil
 
 }
