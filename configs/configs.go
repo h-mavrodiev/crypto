@@ -20,8 +20,8 @@ type GateEndpoints struct {
 }
 
 type GateCommonHeaders struct {
-	Accept      string `json:"Accept"`
-	ContetnType string `json:"Content-Type"`
+	Accept      string `yaml:"accept"`
+	ContentType string `yaml:"contentType"`
 }
 
 type StexConfig struct {

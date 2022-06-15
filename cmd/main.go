@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/configs"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -52,10 +53,12 @@ func ReadInput() (configs.Config, error) {
 
 func main() {
 
+	// uncomment to have the user point to a config
 	// conf, err := ReadInput()
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
+
 	conf, err := configs.LoadConfig("config", "yml", "/home/icetwo/configs")
 	if err != nil {
 		fmt.Println(err)
@@ -65,26 +68,36 @@ func main() {
 		conf.Gate.CommonHeaders, conf.Gate.APIKey, conf.Gate.APISecret)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		fmt.Println(gateClinet)
 	}
 
-	r, err := gateClinet.GetListChains("currency=GT")
+	r, err := gateClinet.GetListChains("currency", "USDT")
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println("###")
 		fmt.Print(r)
-		fmt.Println("###")
 	}
 
-	// fmt.Println("###")
-	// tss, errr := gateClinet.GenSign(gateClinet.Endpoints.Wallet, "GET", "", p)
-	// if errr != nil {
-	// 	fmt.Println(errr)
-	// }
-	// fmt.Println(tss)
-	// fmt.Println("###")
+	res, err := gateClinet.GetWithdrawalRecords("", "")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		jsonSTR, err := json.Marshal(res)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(string(jsonSTR))
+	}
+
+	balance, err := gateClinet.GetTotalBalance("", "")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		jsonSTR, err := json.Marshal(balance)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(string(jsonSTR))
+	}
 
 	stexClinet := StexClient.NewClient(conf.Stex.Host, conf.Stex.APIKey, conf.Stex.StexEndpoints)
 	if err != nil {

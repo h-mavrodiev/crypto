@@ -4,6 +4,23 @@ import (
 	"net/http"
 )
 
+func (c *GateClient) CreateGetRequest(resource string, queryParam string, queryString string) (*http.Request, error) {
+
+	urlStr := (c.Host + c.Prefix + c.Endpoints.Wallet + resource)
+
+	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	q := req.URL.Query()
+	q.Add(queryParam, queryString)
+	req.URL.RawQuery = q.Encode()
+
+	return req, nil
+}
+
 type CurrencyChain []struct {
 	Chain              string `json:"chain"`
 	NameCn             string `json:"name_cn"`
@@ -14,19 +31,17 @@ type CurrencyChain []struct {
 }
 
 // Send Get reuquest to the List Chains Gate enpoint
-func (c *GateClient) GetListChains(query string) (*CurrencyChain, error) {
-	url := (c.Host + c.Prefix + c.Endpoints.Wallet + "/currency_chains" + "?" + query)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-
+func (c *GateClient) GetListChains(queryParam string, queryString string) (*CurrencyChain, error) {
+	resource := "/currency_chains"
+	req, err := c.CreateGetRequest(resource, queryParam, queryString)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
 	res := CurrencyChain{}
 	if err := c.SendRequest(req, &res); err != nil {
 		return nil, err
 	}
+
 	return &res, nil
 }
 
@@ -42,23 +57,108 @@ type WithdrawalRecords []struct {
 	Chain     string `json:"chain"`
 }
 
-func (c *GateClient) GetRetrieveWithdrawalRecords(query string) (*WithdrawalRecords, error) {
-	resourse := "/withdrawals"
-	url := (c.Host + c.Prefix + c.Endpoints.Wallet + resourse)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func (c *GateClient) GetWithdrawalRecords(queryParam string, queryString string) (*WithdrawalRecords, error) {
+	resource := "/withdrawals"
 
+	req, err := c.CreateGetRequest(resource, queryParam, queryString)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Accept", c.CommonHeaders.Accept)
-	req.Header.Add("Content-Type", c.CommonHeaders.ContetnType)
 
-	if err := c.SignReq(req, http.MethodGet, resourse, "", ""); err != nil {
+	err = c.SignReq(req, http.MethodGet, resource, req.URL.RawQuery, "")
+	if err != nil {
 		return nil, err
 	}
 
 	res := WithdrawalRecords{}
-	if err := c.SendRequest(req, &res); err != nil {
+	if err = c.SendRequest(req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+type TotalBalance struct {
+	Details Details `json:"details"`
+	Total   Total   `json:"total"`
+}
+
+type Total struct {
+	Currency string `json:"currency"`
+	Amount   string `json:"amount"`
+}
+
+type Details struct {
+	CrossMargin CrossMargin `json:"cross_margin"`
+	Spot        Spot        `json:"spot"`
+	Finance     Finance     `json:"finance"`
+	Margin      Margin      `json:"margin"`
+	Quant       Quant       `json:"quant"`
+	Futures     Futures     `json:"futures"`
+	Delivery    Delivery    `json:"delivery"`
+	Warrant     Warrant     `json:"warrant"`
+	Cbbc        Cbbc        `json:"cbbc"`
+}
+
+type CrossMargin struct {
+	Amount   string `json:"amount"`
+	Currency string `json:"currency"`
+}
+
+type Spot struct {
+	Currency string `json:"currency"`
+	Amount   string `json:"amount"`
+}
+
+type Finance struct {
+	Amount   string `json:"amount"`
+	Currency string `json:"currency"`
+}
+
+type Margin struct {
+	Amount   string `json:"amount"`
+	Currency string `json:"currency"`
+}
+
+type Quant struct {
+	Amount   string `json:"amount"`
+	Currency string `json:"currency"`
+}
+
+type Futures struct {
+	Amount   string `json:"amount"`
+	Currency string `json:"currency"`
+}
+
+type Delivery struct {
+	Currency string `json:"currency"`
+	Amount   string `json:"amount"`
+}
+
+type Warrant struct {
+	Amount   string `json:"amount"`
+	Currency string `json:"currency"`
+}
+
+type Cbbc struct {
+	Currency string `json:"currency"`
+	Amount   string `json:"amount"`
+}
+
+func (c *GateClient) GetTotalBalance(queryParam string, queryString string) (*TotalBalance, error) {
+	resource := "/total_balance"
+
+	req, err := c.CreateGetRequest(resource, queryParam, queryString)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.SignReq(req, http.MethodGet, resource, req.URL.RawQuery, "")
+	if err != nil {
+		return nil, err
+	}
+
+	res := TotalBalance{}
+	if err = c.SendRequest(req, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil

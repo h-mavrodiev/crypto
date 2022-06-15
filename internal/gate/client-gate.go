@@ -10,7 +10,7 @@ import (
 )
 
 type errorResponse struct {
-	Code    int    `json:"code"`
+	Label   string `json:"label"`
 	Message string `json:"message"`
 }
 
@@ -29,7 +29,7 @@ func (c *GateClient) SendRequest(
 	if res.StatusCode != http.StatusOK {
 		var errRes errorResponse
 		if err = json.NewDecoder(res.Body).Decode(&errRes); err == nil {
-			return errors.New(errRes.Message)
+			return errors.New(errRes.Message + "\nError Label: " + errRes.Label)
 		}
 
 		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
