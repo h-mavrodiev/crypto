@@ -1,7 +1,9 @@
 package stex
 
 import (
+	"errors"
 	"strconv"
+	"sync"
 )
 
 type CurrencyPairDetails []struct {
@@ -70,19 +72,23 @@ type Bid []struct {
 	CumulativeAmount float64 `json:"cumulative_amount"`
 }
 
-func (c *StexClient) GetOrderBookDetails(pair int) (*OrderBookDetails, error) {
+func (c *StexClient) GetOrderBookDetails(pair int, ch chan<- interface{}, wg *sync.WaitGroup) error {
 	// ETH-USDT code is 407
+	defer wg.Done()
+
 	resource := "/orderbook" + "/" + strconv.Itoa(pair)
 
 	req, err := c.CreateGetRequest(c.Endpoints.Public, resource, "", "")
 	if err != nil {
-		return nil, err
+		return errors.New("faild create get request for stex order book")
 	}
 
 	res := OrderBookDetails{}
 	if err = c.SendRequest(req, &res); err != nil {
-		return nil, err
+		return errors.New("failed get request for stex order book")
 	}
 
-	return &res, nil
+	ch <- res
+
+	return nil
 }

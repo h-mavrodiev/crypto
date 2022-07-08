@@ -1,7 +1,6 @@
 package calls
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -32,84 +31,66 @@ func (c *Clients) InitClients(conf configs.Config) {
 
 }
 
-func (c *Clients) Calls() {
+// func (c *Clients) Calls() {
 
-	r, err := c.GateClient.GetListChains("currency", "USDT")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.MarshalIndent(r, "", "")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(jsonSTR))
-	}
+// 	r, err := c.GateClient.GetListChains("currency", "USDT")
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	} else {
+// 		jsonSTR, err := json.MarshalIndent(r, "", "")
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		fmt.Println(string(jsonSTR))
+// 	}
 
-	res, err := c.GateClient.GetWithdrawalRecords("", "")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.MarshalIndent(res, "", "")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(jsonSTR))
-	}
+// 	res, err := c.GateClient.GetWithdrawalRecords("", "")
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	} else {
+// 		jsonSTR, err := json.MarshalIndent(res, "", "")
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		fmt.Println(string(jsonSTR))
+// 	}
 
-	balance, err := c.GateClient.GetTotalBalance("", "")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.MarshalIndent(balance, "", "")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(jsonSTR))
-	}
+// 	balance, err := c.GateClient.GetTotalBalance("", "")
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	} else {
+// 		jsonSTR, err := json.MarshalIndent(balance, "", "")
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		fmt.Println(string(jsonSTR))
+// 	}
 
-	info, err := c.StexClient.GetProfileInfo()
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.MarshalIndent(info, "", "")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(jsonSTR))
-	}
+// 	info, err := c.StexClient.GetProfileInfo()
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	} else {
+// 		jsonSTR, err := json.MarshalIndent(info, "", "")
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		fmt.Println(string(jsonSTR))
+// 	}
 
-	pairFees, err := c.StexClient.GetCurrencyPairFees(1)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.MarshalIndent(pairFees, "", "")
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(jsonSTR))
-	}
+// 	pairFees, err := c.StexClient.GetCurrencyPairFees(1)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	} else {
+// 		jsonSTR, err := json.MarshalIndent(pairFees, "", "")
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		fmt.Println(string(jsonSTR))
+// 	}
 
-}
+// }
 
-func (c *Clients) CallGateGetCurrencyPairDetails(ch chan interface{}) {
-
-	gatePairDetails, err := c.GateClient.GetCurrencyPairDetails("ETH_USDT")
-	if err != nil {
-		fmt.Println(err)
-	}
-	ch <- gatePairDetails
-}
-
-func (c *Clients) CallGateGetOrderBook(ch chan interface{}) {
-
-	gateOrder, err := c.GateClient.GetOrderBookDetails("ETH_USDT")
-	if err != nil {
-		fmt.Println(err)
-	}
-	ch <- gateOrder
-}
-
-func (c *Clients) CallStexGetCurrencyPairDetails(ch chan interface{}) {
+func (c *Clients) CallStexGetCurrencyPairDetails(ch chan<- interface{}) {
 	// ETH-USDT code is 407
 	stexPairDetails, err := c.StexClient.GetCurrencyPairDetails(407)
 	if err != nil {
@@ -118,32 +99,24 @@ func (c *Clients) CallStexGetCurrencyPairDetails(ch chan interface{}) {
 	ch <- stexPairDetails
 }
 
-func (c *Clients) CallStexGetOrderBook(ch chan interface{}) {
-	// ETH-USDT code is 407
-	stexOrder, err := c.StexClient.GetOrderBookDetails(407)
-	if err != nil {
-		fmt.Println(err)
-	}
-	ch <- stexOrder
-}
-
 func (c *Clients) GetOrderBooksConcurrently(
 	gateChanel chan interface{},
 	stexChanel chan interface{}) {
 
 	wg := sync.WaitGroup{}
 
-	// for i := 0; i < num; i++ {
 	wg.Add(2)
 	go func() {
-		c.CallGateGetOrderBook(gateChanel)
+		err := c.GateClient.GetOrderBookDetails("ETH_USDT", gateChanel, &wg)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}()
-	wg.Done()
-
 	go func() {
-		c.CallStexGetOrderBook(stexChanel)
+		err := c.StexClient.GetOrderBookDetails(407, stexChanel, &wg)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}()
-	wg.Done()
-	// }
 	wg.Wait()
 }

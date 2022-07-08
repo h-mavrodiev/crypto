@@ -1,5 +1,10 @@
 package gate
 
+import (
+	"errors"
+	"sync"
+)
+
 type CurrencyPairDetails struct {
 	ID              string `json:"id"`
 	Base            string `json:"base"`
@@ -14,20 +19,24 @@ type CurrencyPairDetails struct {
 	BuyStart        int    `json:"buy_start"`
 }
 
-func (c *GateClient) GetCurrencyPairDetails(pair string) (*CurrencyPairDetails, error) {
+func (c *GateClient) GetCurrencyPairDetails(pair string, ch chan<- interface{}, wg *sync.WaitGroup) error {
+	defer wg.Done()
+
 	resource := "/currency_pairs" + "/" + pair
 
 	req, err := c.CreateGetRequest(c.Endpoints.Spot, resource, "", "")
 	if err != nil {
-		return nil, err
+		return errors.New("faild create get request for gate currency pair details")
 	}
 
 	res := CurrencyPairDetails{}
 	if err = c.SendRequest(req, &res); err != nil {
-		return nil, err
+		return errors.New("failed to send get request for gate currency pair details")
 	}
 
-	return &res, nil
+	ch <- res
+
+	return nil
 }
 
 type OrderBookDetails struct {
@@ -38,18 +47,23 @@ type OrderBookDetails struct {
 	Bids    [][]string `json:"bids"`
 }
 
-func (c *GateClient) GetOrderBookDetails(pair string) (*OrderBookDetails, error) {
+func (c *GateClient) GetOrderBookDetails(pair string, ch chan<- interface{}, wg *sync.WaitGroup) error {
+
+	defer wg.Done()
+
 	resource := "/order_book"
 
 	req, err := c.CreateGetRequest(c.Endpoints.Spot, resource, "currency_pair", pair)
 	if err != nil {
-		return nil, err
+		return errors.New("faild create get request for gate order book")
 	}
 
 	res := OrderBookDetails{}
 	if err = c.SendRequest(req, &res); err != nil {
-		return nil, err
+		return errors.New("failed to send get request for gate order book")
 	}
 
-	return &res, nil
+	ch <- res
+
+	return nil
 }

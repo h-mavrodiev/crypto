@@ -4,56 +4,19 @@ import (
 	"crypto/configs"
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
+	"time"
 
 	caller "crypto/internal/calls"
 )
 
-// ReadInput reads input from user
-func ReadInput() (configs.Config, error) {
-	var cn, ct, cp string
-	var err error
-
-	fmt.Println("path to config folder:  ")
-	_, err = fmt.Scanln(&cp)
-	if err != nil {
-		fmt.Printf("No path was provided...\n")
-		log.Fatal(err)
-	} else {
-		// Check if directory exists
-		_, err := os.Stat(cp)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	fmt.Println("config file name: ")
-	_, err = fmt.Scanln(&cn)
-	if err != nil {
-		fmt.Printf("No name was provided...\n")
-		log.Fatal(err)
-	}
-
-	fmt.Println("config file type: ")
-	_, err = fmt.Scanln(&ct)
-	if err != nil {
-		fmt.Printf("No type was provided...\n")
-		log.Fatal(err)
-	}
-
-	conf, err := configs.LoadConfig(cn, ct, cp)
-	if err != nil {
-		return configs.Config{}, err
-	}
-
-	return conf, nil
+func printExecutionTime(t time.Time) {
+	fmt.Println("Execution time: ", time.Since(t))
 }
 
 func main() {
 
 	// uncomment to have the user point to a config
-	// conf, err := ReadInput()
+	// conf, err := configs.LoadConfigFromInput()
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
@@ -63,32 +26,25 @@ func main() {
 		fmt.Println(err)
 	}
 
+	startTime := time.Now()
+	defer printExecutionTime(startTime)
+
 	c := caller.Clients{}
 	c.InitClients(conf)
-	// c.MakeCalls()
 	gateOrders := make(chan interface{}, 10)
 	defer close(gateOrders)
 	stexOrders := make(chan interface{}, 10)
 	defer close(stexOrders)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 15; i++ {
 		c.GetOrderBooksConcurrently(gateOrders, stexOrders)
-
 		select {
 		case gateOrder := <-gateOrders:
-			_, err := json.MarshalIndent(gateOrder, "", "")
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Println(string("GateOrder"))
-			fmt.Println("=============================================")
+			gateRes, _ := json.MarshalIndent(gateOrder, "", "")
+			fmt.Println(string(gateRes))
 		case stexOrder := <-stexOrders:
-			_, err := json.MarshalIndent(stexOrder, "", "")
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Println(string("StexOrder"))
-			fmt.Println("=============================================")
+			stexRes, _ := json.MarshalIndent(stexOrder, "", "")
+			fmt.Println(string(stexRes))
 		}
 	}
 }
