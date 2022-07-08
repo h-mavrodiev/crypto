@@ -7,8 +7,7 @@ import (
 	"log"
 	"os"
 
-	GateClient "crypto/internal/gate"
-	StexClient "crypto/internal/stex"
+	caller "crypto/internal/calls"
 )
 
 // ReadInput reads input from user
@@ -64,45 +63,32 @@ func main() {
 		fmt.Println(err)
 	}
 
-	gateClinet, err := GateClient.NewClient(conf.Gate.Host, conf.Gate.Prefix, conf.Gate.GateEndpoints,
-		conf.Gate.CommonHeaders, conf.Gate.APIKey, conf.Gate.APISecret)
-	if err != nil {
-		fmt.Println(err)
-	}
+	c := caller.Clients{}
+	c.InitClients(conf)
+	// c.MakeCalls()
+	gateOrders := make(chan interface{}, 10)
+	defer close(gateOrders)
+	stexOrders := make(chan interface{}, 10)
+	defer close(stexOrders)
 
-	r, err := gateClinet.GetListChains("currency", "USDT")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Print(r)
-	}
+	for i := 0; i < 100; i++ {
+		c.GetOrderBooksConcurrently(gateOrders, stexOrders)
 
-	res, err := gateClinet.GetWithdrawalRecords("", "")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.Marshal(res)
-		if err != nil {
-			fmt.Println(err)
+		select {
+		case gateOrder := <-gateOrders:
+			_, err := json.MarshalIndent(gateOrder, "", "")
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(string("GateOrder"))
+			fmt.Println("=============================================")
+		case stexOrder := <-stexOrders:
+			_, err := json.MarshalIndent(stexOrder, "", "")
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(string("StexOrder"))
+			fmt.Println("=============================================")
 		}
-		fmt.Println(string(jsonSTR))
-	}
-
-	balance, err := gateClinet.GetTotalBalance("", "")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.Marshal(balance)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(jsonSTR))
-	}
-
-	stexClinet := StexClient.NewClient(conf.Stex.Host, conf.Stex.APIKey, conf.Stex.StexEndpoints)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(stexClinet)
 	}
 }

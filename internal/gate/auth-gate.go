@@ -16,11 +16,12 @@ import (
 func (c *GateClient) SignReq(
 	req *http.Request,
 	method string,
+	endpoint string,
 	apiRes string,
 	queryString string,
 	payloadString string) error {
 
-	authURL := c.Host + c.Prefix + c.Endpoints.Wallet + apiRes
+	authURL := c.Host + c.Prefix + endpoint + apiRes
 	requestUrl, err := url.Parse(authURL)
 	if err != nil {
 		return err

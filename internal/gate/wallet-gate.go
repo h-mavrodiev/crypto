@@ -1,25 +1,6 @@
 package gate
 
-import (
-	"net/http"
-)
-
-func (c *GateClient) CreateGetRequest(resource string, queryParam string, queryString string) (*http.Request, error) {
-
-	urlStr := (c.Host + c.Prefix + c.Endpoints.Wallet + resource)
-
-	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-	q := req.URL.Query()
-	q.Add(queryParam, queryString)
-	req.URL.RawQuery = q.Encode()
-
-	return req, nil
-}
+import "net/http"
 
 type CurrencyChain []struct {
 	Chain              string `json:"chain"`
@@ -30,10 +11,10 @@ type CurrencyChain []struct {
 	IsWithdrawDisabled int    `json:"is_withdraw_disabled"`
 }
 
-// Send Get reuquest to the List Chains Gate enpoint
+// Send Get reuquests to the List Chains Gate enpoint
 func (c *GateClient) GetListChains(queryParam string, queryString string) (*CurrencyChain, error) {
 	resource := "/currency_chains"
-	req, err := c.CreateGetRequest(resource, queryParam, queryString)
+	req, err := c.CreateGetRequest(c.Endpoints.Wallet, resource, queryParam, queryString)
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +41,12 @@ type WithdrawalRecords []struct {
 func (c *GateClient) GetWithdrawalRecords(queryParam string, queryString string) (*WithdrawalRecords, error) {
 	resource := "/withdrawals"
 
-	req, err := c.CreateGetRequest(resource, queryParam, queryString)
+	req, err := c.CreateGetRequest(c.Endpoints.Wallet, resource, queryParam, queryString)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.SignReq(req, http.MethodGet, resource, req.URL.RawQuery, "")
+	err = c.SignReq(req, http.MethodGet, c.Endpoints.Wallet, resource, req.URL.RawQuery, "")
 	if err != nil {
 		return nil, err
 	}
@@ -147,12 +128,12 @@ type Cbbc struct {
 func (c *GateClient) GetTotalBalance(queryParam string, queryString string) (*TotalBalance, error) {
 	resource := "/total_balance"
 
-	req, err := c.CreateGetRequest(resource, queryParam, queryString)
+	req, err := c.CreateGetRequest(c.Endpoints.Wallet, resource, queryParam, queryString)
 	if err != nil {
 		return nil, err
 	}
 
-	err = c.SignReq(req, http.MethodGet, resource, req.URL.RawQuery, "")
+	err = c.SignReq(req, http.MethodGet, c.Endpoints.Wallet, resource, req.URL.RawQuery, "")
 	if err != nil {
 		return nil, err
 	}

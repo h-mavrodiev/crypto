@@ -9,14 +9,31 @@ import (
 	"time"
 )
 
+// CreateGetReqeust creates GET http request
+func (c *StexClient) CreateGetRequest(endpoint string, resource string, queryParam string, queryString string) (*http.Request, error) {
+
+	urlStr := (c.Host + endpoint + resource)
+
+	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept", c.CommonHeaders.Accept)
+	req.Header.Add("Content-Type", c.CommonHeaders.ContentType)
+	q := req.URL.Query()
+	q.Add(queryParam, queryString)
+	req.URL.RawQuery = q.Encode()
+
+	return req, nil
+}
+
 type errorResponse struct {
-	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
 type successResponse struct {
-	Code int         `json:"code"`
-	Data interface{} `json:"data"`
+	Success bool        `json:"success"`
+	Data    interface{} `json:"data"`
 }
 
 func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
@@ -52,13 +69,18 @@ func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 
 // Client struct
 type StexClient struct {
-	Host       string
-	Endpoints  configs.StexEndpoints
-	ApiKey     string
-	HTTPClient *http.Client
+	Host          string
+	ApiKey        string
+	Endpoints     configs.StexEndpoints
+	CommonHeaders configs.StexCommonHeaders
+	HTTPClient    *http.Client
 }
 
-func NewClient(host string, apiKey string, endpoints configs.StexEndpoints) *StexClient {
+func NewClient(
+	host string,
+	apiKey string,
+	endpoints configs.StexEndpoints,
+	headers configs.StexCommonHeaders) *StexClient {
 	return &StexClient{
 		Host:      host,
 		Endpoints: endpoints,

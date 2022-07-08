@@ -9,8 +9,8 @@ type GateConfig struct {
 	Prefix        string            `yaml:"prefix"`
 	APIKey        string            `yaml:"apiKey"`
 	APISecret     string            `yaml:"apiSecret"`
+	Endpoints     GateEndpoints     `yaml:"endpoints"`
 	CommonHeaders GateCommonHeaders `yaml:"commonHeaders"`
-	GateEndpoints GateEndpoints     `yaml:"gateEndpoints"`
 }
 
 type GateEndpoints struct {
@@ -25,14 +25,21 @@ type GateCommonHeaders struct {
 }
 
 type StexConfig struct {
-	Host          string        `yaml:"host"`
-	APIKey        string        `yaml:"apiKey"`
-	StexEndpoints StexEndpoints `yaml:"stexEndpoints"`
+	Host          string            `yaml:"host"`
+	APIKey        string            `yaml:"apiKey"`
+	Endpoints     StexEndpoints     `yaml:"endpoints"`
+	CommonHeaders StexCommonHeaders `yaml:"commonHeaders"`
 }
 
 type StexEndpoints struct {
 	Public  string `yaml:"public"`
 	Trading string `yaml:"trading"`
+	Profile string `yaml:"profile"`
+}
+
+type StexCommonHeaders struct {
+	Accept      string `yaml:"accept"`
+	ContentType string `yaml:"contentType"`
 }
 
 // Needs updating when new platform is added
