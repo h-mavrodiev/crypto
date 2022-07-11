@@ -1,5 +1,7 @@
 package stex
 
+import "errors"
+
 type InfoData struct {
 	Email                 string           `json:"email"`
 	Username              string           `json:"username"`
@@ -61,17 +63,23 @@ type Settings struct {
 	ConfirmWithdrawalsWithEmail bool `json:"confirm_withdrawals_with_email"`
 }
 
-func (c *StexClient) GetProfileInfo() (*InfoData, error) {
+func (c *StexClient) GetProfileInfo(ch chan<- interface{}) error {
+
 	resource := "info"
 
 	req, err := c.CreateGetRequest(c.Endpoints.Profile, resource, "", "")
 	if err != nil {
-		return nil, err
+		return errors.New("faild create get request for stex profile info")
 	}
 
 	c.Authenticate(req)
-	res := InfoData{}
-	c.SendRequest(req, &res)
 
-	return &res, nil
+	res := InfoData{}
+	if err = c.SendRequest(req, &res); err != nil {
+		return errors.New("failed get request for stex profile info")
+	}
+
+	ch <- res
+
+	return nil
 }

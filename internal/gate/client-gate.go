@@ -11,7 +11,6 @@ import (
 
 // CreateGetReqeust creates GET http request
 func (c *GateClient) CreateGetRequest(endpoint string, resource string, queryParam string, queryString string) (*http.Request, error) {
-
 	urlStr := (c.Host + c.Prefix + endpoint + resource)
 
 	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
@@ -35,7 +34,6 @@ type errorResponse struct {
 func (c *GateClient) SendRequest(
 	req *http.Request,
 	target interface{}) error {
-
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return err

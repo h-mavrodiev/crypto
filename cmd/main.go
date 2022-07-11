@@ -31,20 +31,36 @@ func main() {
 
 	c := caller.Clients{}
 	c.InitClients(conf)
-	gateOrders := make(chan interface{}, 10)
-	defer close(gateOrders)
-	stexOrders := make(chan interface{}, 10)
-	defer close(stexOrders)
+	gateOrders := make(chan interface{})
+	// defer close(gateOrders)
 
-	for i := 0; i < 15; i++ {
-		c.GetOrderBooksConcurrently(gateOrders, stexOrders)
+	stexOrders := make(chan interface{})
+	// defer close(stexOrders)
+	gate := 0
+	stex := 0
+
+	// for {
+	for i := 0; i < 300; i++ {
+		// c.GetOrderBooksConcurrently(gateOrders, stexOrders)
+		c.CallStexGetOrderBookDetails(stexOrders)
+		c.CallGateGetOrderBookDetails(gateOrders)
 		select {
 		case gateOrder := <-gateOrders:
-			gateRes, _ := json.MarshalIndent(gateOrder, "", "")
-			fmt.Println(string(gateRes))
+			_, err := json.MarshalIndent(gateOrder, "", "")
+			if err != nil {
+				fmt.Println("not nil")
+			}
+			gate++
+			// fmt.Println(string(gateRes))
 		case stexOrder := <-stexOrders:
-			stexRes, _ := json.MarshalIndent(stexOrder, "", "")
-			fmt.Println(string(stexRes))
+			_, err := json.MarshalIndent(stexOrder, "", "")
+			if err != nil {
+				fmt.Println("not nil")
+			}
+			stex++
+			// fmt.Println(string(stexRes))
 		}
 	}
+	fmt.Printf("Gate requests: %d\n", gate)
+	fmt.Printf("Stex requests: %d\n", stex)
 }

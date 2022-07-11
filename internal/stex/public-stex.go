@@ -3,7 +3,6 @@ package stex
 import (
 	"errors"
 	"strconv"
-	"sync"
 )
 
 type CurrencyPairDetails []struct {
@@ -31,20 +30,21 @@ type CurrencyPairDetails []struct {
 	TradingPrecision  int    `json:"trading_precision"`
 }
 
-func (c *StexClient) GetCurrencyPairDetails(pair int) (*CurrencyPairDetails, error) {
+func (c *StexClient) GetCurrencyPairDetails(pair int, ch chan<- interface{}) error {
 	resource := "/currency_pairs" + "/" + strconv.Itoa(pair)
 
 	req, err := c.CreateGetRequest(c.Endpoints.Public, resource, "", "")
 	if err != nil {
-		return nil, err
+		return errors.New("faild create get request for stex pair details")
 	}
 
 	res := CurrencyPairDetails{}
 	if err = c.SendRequest(req, &res); err != nil {
-		return nil, err
+		return errors.New("failed get request for stex pair details")
 	}
+	ch <- res
 
-	return &res, nil
+	return nil
 }
 
 type OrderBookDetails struct {
@@ -72,9 +72,8 @@ type Bid []struct {
 	CumulativeAmount float64 `json:"cumulative_amount"`
 }
 
-func (c *StexClient) GetOrderBookDetails(pair int, ch chan<- interface{}, wg *sync.WaitGroup) error {
+func (c *StexClient) GetOrderBookDetails(pair int, ch chan<- interface{}) error {
 	// ETH-USDT code is 407
-	defer wg.Done()
 
 	resource := "/orderbook" + "/" + strconv.Itoa(pair)
 

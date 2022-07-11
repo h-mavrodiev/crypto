@@ -2,10 +2,9 @@ package calls
 
 import (
 	"fmt"
-	"sync"
+	"time"
 
 	"crypto/configs"
-
 	GateClient "crypto/internal/gate"
 	StexClient "crypto/internal/stex"
 )
@@ -31,92 +30,103 @@ func (c *Clients) InitClients(conf configs.Config) {
 
 }
 
-// func (c *Clients) Calls() {
+func (c *Clients) CallGateListChains(ch chan<- interface{}) {
+	// ETH-USDT code is 407
+	go func() {
+		for {
+			err := c.GateClient.GetListChains("currency", "USDT", ch)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}()
+}
 
-// 	r, err := c.GateClient.GetListChains("currency", "USDT")
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	} else {
-// 		jsonSTR, err := json.MarshalIndent(r, "", "")
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		fmt.Println(string(jsonSTR))
-// 	}
+func (c *Clients) CallGateWithdrawalRecords(ch chan<- interface{}) {
+	// ETH-USDT code is 407
+	go func() {
+		for {
+			err := c.GateClient.GetWithdrawalRecords("", "", ch)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}()
+}
 
-// 	res, err := c.GateClient.GetWithdrawalRecords("", "")
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	} else {
-// 		jsonSTR, err := json.MarshalIndent(res, "", "")
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		fmt.Println(string(jsonSTR))
-// 	}
+func (c *Clients) CallGateTotalBalance(ch chan<- interface{}) {
+	// ETH-USDT code is 407
+	go func() {
+		for {
+			err := c.GateClient.GetTotalBalance("", "", ch)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}()
+}
 
-// 	balance, err := c.GateClient.GetTotalBalance("", "")
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	} else {
-// 		jsonSTR, err := json.MarshalIndent(balance, "", "")
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		fmt.Println(string(jsonSTR))
-// 	}
+func (c *Clients) CallStexProfileInfo(ch chan<- interface{}) {
+	// ETH-USDT code is 407
+	go func() {
+		for {
+			err := c.StexClient.GetProfileInfo(ch)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}()
+}
 
-// 	info, err := c.StexClient.GetProfileInfo()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	} else {
-// 		jsonSTR, err := json.MarshalIndent(info, "", "")
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		fmt.Println(string(jsonSTR))
-// 	}
-
-// 	pairFees, err := c.StexClient.GetCurrencyPairFees(1)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	} else {
-// 		jsonSTR, err := json.MarshalIndent(pairFees, "", "")
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		fmt.Println(string(jsonSTR))
-// 	}
+func (c *Clients) CallStexCurrencyPairFees(pair int, ch chan<- interface{}) {
+	// ETH-USDT code is 407
+	go func() {
+		for {
+			err := c.StexClient.GetCurrencyPairFees(pair, ch)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}()
+}
 
 // }
 
 func (c *Clients) CallStexGetCurrencyPairDetails(ch chan<- interface{}) {
 	// ETH-USDT code is 407
-	stexPairDetails, err := c.StexClient.GetCurrencyPairDetails(407)
-	if err != nil {
-		fmt.Println(err)
-	}
-	ch <- stexPairDetails
+	go func() {
+		for {
+			err := c.StexClient.GetCurrencyPairDetails(407, ch)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}()
 }
 
-func (c *Clients) GetOrderBooksConcurrently(
-	gateChanel chan interface{},
-	stexChanel chan interface{}) {
-
-	wg := sync.WaitGroup{}
-
-	wg.Add(2)
+func (c *Clients) CallStexGetOrderBookDetails(ch chan<- interface{}) {
+	// ETH-USDT code is 407
 	go func() {
-		err := c.GateClient.GetOrderBookDetails("ETH_USDT", gateChanel, &wg)
-		if err != nil {
-			fmt.Println(err.Error())
+		for {
+			// Sleep is needed as Stex API is much faster to response ...
+			// 1/4 seconds seems to work best
+			time.Sleep(time.Second / 4)
+			err := c.StexClient.GetOrderBookDetails(407, ch)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 	}()
+}
+
+func (c *Clients) CallGateGetOrderBookDetails(ch chan<- interface{}) {
 	go func() {
-		err := c.StexClient.GetOrderBookDetails(407, stexChanel, &wg)
-		if err != nil {
-			fmt.Println(err.Error())
+		for {
+			// time.Sleep(time.Second / 5)
+			err := c.GateClient.GetOrderBookDetails("ETH_USDT", ch)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 	}()
-	wg.Wait()
 }

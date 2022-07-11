@@ -3,7 +3,6 @@ package gate
 import (
 	"errors"
 	"net/http"
-	"sync"
 )
 
 type CurrencyChain []struct {
@@ -16,8 +15,7 @@ type CurrencyChain []struct {
 }
 
 // Send Get reuquests to the List Chains Gate enpoint
-func (c *GateClient) GetListChains(queryParam string, queryString string, ch chan<- interface{}, wg *sync.WaitGroup) error {
-	defer wg.Done()
+func (c *GateClient) GetListChains(queryParam string, queryString string, ch chan<- interface{}) error {
 	resource := "/currency_chains"
 	req, err := c.CreateGetRequest(c.Endpoints.Wallet, resource, queryParam, queryString)
 	if err != nil {
@@ -46,8 +44,7 @@ type WithdrawalRecords []struct {
 	Chain     string `json:"chain"`
 }
 
-func (c *GateClient) GetWithdrawalRecords(queryParam string, queryString string, ch chan<- interface{}, wg *sync.WaitGroup) error {
-	defer wg.Done()
+func (c *GateClient) GetWithdrawalRecords(queryParam string, queryString string, ch chan<- interface{}) error {
 	resource := "/withdrawals"
 
 	req, err := c.CreateGetRequest(c.Endpoints.Wallet, resource, queryParam, queryString)
@@ -137,8 +134,7 @@ type Cbbc struct {
 	Amount   string `json:"amount"`
 }
 
-func (c *GateClient) GetTotalBalance(queryParam string, queryString string, ch chan<- interface{}, wg *sync.WaitGroup) error {
-	defer wg.Done()
+func (c *GateClient) GetTotalBalance(queryParam string, queryString string, ch chan<- interface{}) error {
 
 	resource := "/total_balance"
 
