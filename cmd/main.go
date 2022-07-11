@@ -4,57 +4,19 @@ import (
 	"crypto/configs"
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
+	"time"
 
-	GateClient "crypto/internal/gate"
-	StexClient "crypto/internal/stex"
+	caller "crypto/internal/calls"
 )
 
-// ReadInput reads input from user
-func ReadInput() (configs.Config, error) {
-	var cn, ct, cp string
-	var err error
-
-	fmt.Println("path to config folder:  ")
-	_, err = fmt.Scanln(&cp)
-	if err != nil {
-		fmt.Printf("No path was provided...\n")
-		log.Fatal(err)
-	} else {
-		// Check if directory exists
-		_, err := os.Stat(cp)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	fmt.Println("config file name: ")
-	_, err = fmt.Scanln(&cn)
-	if err != nil {
-		fmt.Printf("No name was provided...\n")
-		log.Fatal(err)
-	}
-
-	fmt.Println("config file type: ")
-	_, err = fmt.Scanln(&ct)
-	if err != nil {
-		fmt.Printf("No type was provided...\n")
-		log.Fatal(err)
-	}
-
-	conf, err := configs.LoadConfig(cn, ct, cp)
-	if err != nil {
-		return configs.Config{}, err
-	}
-
-	return conf, nil
+func printExecutionTime(t time.Time) {
+	fmt.Println("Execution time: ", time.Since(t))
 }
 
 func main() {
 
 	// uncomment to have the user point to a config
-	// conf, err := ReadInput()
+	// conf, err := configs.LoadConfigFromInput()
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
@@ -64,45 +26,41 @@ func main() {
 		fmt.Println(err)
 	}
 
-	gateClinet, err := GateClient.NewClient(conf.Gate.Host, conf.Gate.Prefix, conf.Gate.GateEndpoints,
-		conf.Gate.CommonHeaders, conf.Gate.APIKey, conf.Gate.APISecret)
-	if err != nil {
-		fmt.Println(err)
-	}
+	startTime := time.Now()
+	defer printExecutionTime(startTime)
 
-	r, err := gateClinet.GetListChains("currency", "USDT")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Print(r)
-	}
+	c := caller.Clients{}
+	c.InitClients(conf)
+	gateOrders := make(chan interface{})
+	// defer close(gateOrders)
 
-	res, err := gateClinet.GetWithdrawalRecords("", "")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.Marshal(res)
-		if err != nil {
-			fmt.Println(err)
+	stexOrders := make(chan interface{})
+	// defer close(stexOrders)
+	gate := 0
+	stex := 0
+
+	// for {
+	for i := 0; i < 300; i++ {
+		// c.GetOrderBooksConcurrently(gateOrders, stexOrders)
+		c.CallStexGetOrderBookDetails(stexOrders)
+		c.CallGateGetOrderBookDetails(gateOrders)
+		select {
+		case gateOrder := <-gateOrders:
+			_, err := json.MarshalIndent(gateOrder, "", "")
+			if err != nil {
+				fmt.Println("not nil")
+			}
+			gate++
+			// fmt.Println(string(gateRes))
+		case stexOrder := <-stexOrders:
+			_, err := json.MarshalIndent(stexOrder, "", "")
+			if err != nil {
+				fmt.Println("not nil")
+			}
+			stex++
+			// fmt.Println(string(stexRes))
 		}
-		fmt.Println(string(jsonSTR))
 	}
-
-	balance, err := gateClinet.GetTotalBalance("", "")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		jsonSTR, err := json.Marshal(balance)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(jsonSTR))
-	}
-
-	stexClinet := StexClient.NewClient(conf.Stex.Host, conf.Stex.APIKey, conf.Stex.StexEndpoints)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(stexClinet)
-	}
+	fmt.Printf("Gate requests: %d\n", gate)
+	fmt.Printf("Stex requests: %d\n", stex)
 }

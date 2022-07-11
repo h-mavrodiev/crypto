@@ -9,6 +9,23 @@ import (
 	"time"
 )
 
+// CreateGetReqeust creates GET http request
+func (c *GateClient) CreateGetRequest(endpoint string, resource string, queryParam string, queryString string) (*http.Request, error) {
+	urlStr := (c.Host + c.Prefix + endpoint + resource)
+
+	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept", c.CommonHeaders.Accept)
+	req.Header.Add("Content-Type", c.CommonHeaders.ContentType)
+	q := req.URL.Query()
+	q.Add(queryParam, queryString)
+	req.URL.RawQuery = q.Encode()
+
+	return req, nil
+}
+
 type errorResponse struct {
 	Label   string `json:"label"`
 	Message string `json:"message"`
@@ -17,7 +34,6 @@ type errorResponse struct {
 func (c *GateClient) SendRequest(
 	req *http.Request,
 	target interface{}) error {
-
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return err
@@ -59,7 +75,8 @@ func NewClient(
 	prefix string,
 	endpoints configs.GateEndpoints,
 	headers configs.GateCommonHeaders,
-	apiKey string, apiSecret string) (*GateClient, error) {
+	apiKey string,
+	apiSecret string) *GateClient {
 
 	client := &GateClient{
 		Host:          host,
@@ -72,5 +89,5 @@ func NewClient(
 			Timeout: time.Minute,
 		},
 	}
-	return client, nil
+	return client
 }
