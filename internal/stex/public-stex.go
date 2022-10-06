@@ -72,7 +72,7 @@ type Bid []struct {
 	CumulativeAmount float64 `json:"cumulative_amount"`
 }
 
-func (c *StexClient) GetOrderBookDetails(pair int, ch chan<- interface{}) error {
+func (c *StexClient) GetOrderBookDetails(pair int, ch chan<- OrderBookDetails) error {
 	// ETH-USDT code is 407
 
 	resource := "/orderbook" + "/" + strconv.Itoa(pair)

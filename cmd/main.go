@@ -2,16 +2,13 @@ package main
 
 import (
 	"crypto/configs"
-	"encoding/json"
 	"fmt"
-	"time"
 
 	caller "crypto/internal/calls"
+	"crypto/internal/gate"
+	"crypto/internal/stex"
+	"crypto/internal/tui"
 )
-
-func printExecutionTime(t time.Time) {
-	fmt.Println("Execution time: ", time.Since(t))
-}
 
 func main() {
 
@@ -20,47 +17,39 @@ func main() {
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
+	var (
+		gatePriceInfo gate.GateInfo
+		stexPriceInfo stex.StexInfo
+	)
 
 	conf, err := configs.LoadConfig("config", "yml", "/home/icetwo/configs")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	startTime := time.Now()
-	defer printExecutionTime(startTime)
-
 	c := caller.Clients{}
 	c.InitClients(conf)
-	gateOrders := make(chan interface{})
-	// defer close(gateOrders)
 
-	stexOrders := make(chan interface{})
-	// defer close(stexOrders)
-	gate := 0
-	stex := 0
+	// Those channels were never closed... find out if you should actually close them ...
+	gateOrders := make(chan gate.OrderBookDetails)
+	stexOrders := make(chan stex.OrderBookDetails)
 
-	// for {
-	for i := 0; i < 300; i++ {
-		// c.GetOrderBooksConcurrently(gateOrders, stexOrders)
-		c.CallStexGetOrderBookDetails(stexOrders)
-		c.CallGateGetOrderBookDetails(gateOrders)
+	gateAggOrders := make(chan *gate.GateInfo)
+	stexAggOrders := make(chan *stex.StexInfo)
+
+	go c.CallStexGetOrderBookDetails(stexOrders, "1.5s", 407)
+	go c.CallGateGetOrderBookDetails(gateOrders, "1s", "ETH_USDT")
+	go tui.RunTUI(gateAggOrders, stexAggOrders, gatePriceInfo, stexPriceInfo)
+
+	for {
 		select {
 		case gateOrder := <-gateOrders:
-			_, err := json.MarshalIndent(gateOrder, "", "")
-			if err != nil {
-				fmt.Println("not nil")
-			}
-			gate++
-			// fmt.Println(string(gateRes))
+			gateInfo := gateOrder.FindPriceAndVolume(1)
+			gateAggOrders <- gateInfo
 		case stexOrder := <-stexOrders:
-			_, err := json.MarshalIndent(stexOrder, "", "")
-			if err != nil {
-				fmt.Println("not nil")
-			}
-			stex++
-			// fmt.Println(string(stexRes))
+			stexInfo := stexOrder.FindPriceAndVolume(2.2)
+			stexAggOrders <- stexInfo
 		}
 	}
-	fmt.Printf("Gate requests: %d\n", gate)
-	fmt.Printf("Stex requests: %d\n", stex)
+
 }

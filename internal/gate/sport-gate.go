@@ -47,10 +47,7 @@ type OrderBookDetails struct {
 	Bids    [][]string `json:"bids"`
 }
 
-// func (c *GateClient) GetOrderBookDetails(pair string, ch chan<- interface{}, wg *sync.WaitGroup) error {
-func (c *GateClient) GetOrderBookDetails(pair string, ch chan<- interface{}) error {
-
-	// defer wg.Done()
+func (c *GateClient) GetOrderBookDetails(pair string, ch chan<- OrderBookDetails) error {
 
 	resource := "/order_book"
 
