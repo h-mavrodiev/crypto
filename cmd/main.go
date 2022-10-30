@@ -22,7 +22,7 @@ func main() {
 		stexPriceInfo stex.StexInfo
 	)
 
-	conf, err := configs.LoadConfig("config", "yml", "/home/icetwo/configs")
+	conf, err := configs.LoadConfig("config", "yml", "/Users/I576893/nonwork/configs")
 	if err != nil {
 		fmt.Println(err)
 	}
