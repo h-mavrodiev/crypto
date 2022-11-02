@@ -1,21 +1,22 @@
-import logo from './logo.svg';
 import './App.css';
 import BootstrapTable from 'react-bootstrap-table-next';
+import React, { useState } from "react";
 
-const gateData = [ {askPrice:1000, askAmount: 2, bidPrice: 900, bidAmount: 2}];
+
+const gateData = [ {AskPrice:1000, AskAmount: 2, BidPrice: 900, BidAmount: 2}];
 const stexData = [ {askPrice:1000, askAmount: 2, bidPrice: 900, bidAmount: 2}];
 
 const columns = [{
-  dataField: 'askPrice',
+  dataField: 'AskPrice',
   text: 'Ask Price'
 }, {
-  dataField: 'askAmount',
+  dataField: 'AskAmount',
   text: 'Ask Amount'
 }, {
-  dataField: 'bidPrice',
+  dataField: 'BidPrice',
   text: 'Bid Price'
 }, {
-  dataField: 'bidAmount',
+  dataField: 'BidAmount',
   text: 'Bid Amount'
 }];
 
@@ -30,6 +31,7 @@ const WalletCaptionElement = () => <h3 className='Wallet-caption-element'>Wallet
 const PlatformHeaderElement = () => <h3 className='Platform-header-element'>Platform Info</h3>;
 
 function App() {
+
   return (
     <div className="App">
       <div className='Wallet-header'>
@@ -57,9 +59,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
-

@@ -1,75 +1,85 @@
 package stex
 
 import (
-	"fmt"
 	"strconv"
-	"sync"
 )
 
 type StexInfo struct {
-	AskPrice  string
-	AskAmount string
-	BidPrice  string
-	BidAmount string
+	AskPrice             float64
+	AskDollarPrice       float64
+	AskFixedDollarDemand float64
+	AskAmount            float64
+	BidPrice             float64
+	BidDollarPrice       float64
+	BidFixedDollarDemand float64
+	BidAmount            float64
 }
 
-func (s *StexInfo) UpdateStexVisualizeInfo(askPrice string, askAmount string, bidPrice string, bidAmount string) {
-	s.AskPrice = askPrice
-	s.AskAmount = askAmount
-	s.BidPrice = bidPrice
-	s.BidAmount = bidAmount
+func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, askFixedDollarDemand float64, bidFixedDollarDemand float64) {
+	s.CalAskPricePerFixedAmount(o, askFixedDollarDemand)
+	s.CalBidPricePerFixedAmount(o, bidFixedDollarDemand)
 }
 
-func (o *OrderBookDetails) FindPriceAndVolume(volumeByPrice float64) *StexInfo {
+func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, askFixedDollarDemand float64) {
 
-	var (
-		priceOrderAsk       string
-		sumOrdersVolumesAsk float64
-		priceOrderBid       string
-		sumOrderVolumeBid   float64
-	)
-	wg := sync.WaitGroup{}
+	var nextSpentAmount, spentAmount, price, dollarPrice float64
 
-	for sumOrdersVolumesAsk < volumeByPrice {
+	for _, order := range o.Ask {
+		p, err := strconv.ParseFloat(order.Price, 64)
+		if err != nil {
+			s.AskPrice = 8888.88
+		}
+		price = p
 
-		wg.Add(1)
-		go func(wg *sync.WaitGroup) {
-			defer wg.Done()
-			for _, order := range o.Ask {
-				s, err := strconv.ParseFloat(order.Amount, 64)
-				if err != nil {
-					priceOrderAsk = "Error Parsing Price"
-					break
-				}
-				if sumOrdersVolumesAsk < volumeByPrice {
-					sumOrdersVolumesAsk = sumOrdersVolumesAsk + s
-				}
-				priceOrderAsk = order.Price
-			}
-		}(&wg)
+		amount, err := strconv.ParseFloat(order.Amount, 64)
+		if err != nil {
+			s.AskAmount = 9999.99
+		}
 
-		wg.Add(1)
-		go func(wg *sync.WaitGroup) {
-			defer wg.Done()
-			for _, order := range o.Bid {
-				s, err := strconv.ParseFloat(order.Amount, 64)
-				if err != nil {
-					priceOrderBid = "Error Parsing Price"
-					break
-				}
-				if sumOrdersVolumesAsk < volumeByPrice {
-					sumOrderVolumeBid = sumOrderVolumeBid + s
-				}
-				priceOrderBid = order.Price
-			}
-		}(&wg)
+		dollarPrice = 1 / p
+		nextSpentAmount += amount * dollarPrice
+
+		if nextSpentAmount > askFixedDollarDemand {
+			break
+		} else {
+			spentAmount = nextSpentAmount
+		}
 	}
-	wg.Wait()
+	s.AskPrice = price
+	s.AskDollarPrice = dollarPrice
+	s.AskFixedDollarDemand = askFixedDollarDemand
+	spentAmount = nextSpentAmount
+	s.AskAmount = spentAmount
+}
 
-	return &StexInfo{
-		AskPrice:  priceOrderAsk,
-		AskAmount: fmt.Sprintf("%f", sumOrdersVolumesAsk),
-		BidPrice:  priceOrderBid,
-		BidAmount: fmt.Sprintf("%f", sumOrderVolumeBid),
+func (s *StexInfo) CalBidPricePerFixedAmount(o OrderBookDetails, bidFixedDollarDemand float64) {
+
+	var nextSpentAmount, spentAmount, price, dollarPrice float64
+
+	for _, order := range o.Bid {
+		p, err := strconv.ParseFloat(order.Price, 64)
+		if err != nil {
+			s.BidPrice = 8888.88
+		}
+		price = p
+
+		amount, err := strconv.ParseFloat(order.Amount, 64)
+		if err != nil {
+			s.BidAmount = 9999.9
+		}
+
+		dollarPrice = 1 / price
+		nextSpentAmount += amount * dollarPrice
+
+		if nextSpentAmount > bidFixedDollarDemand {
+			break
+		} else {
+			spentAmount = nextSpentAmount
+		}
 	}
+	s.BidPrice = price
+	s.BidDollarPrice = dollarPrice
+	s.BidFixedDollarDemand = bidFixedDollarDemand
+	spentAmount = nextSpentAmount
+	s.BidAmount = spentAmount
 }
