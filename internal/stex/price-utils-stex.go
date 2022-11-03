@@ -5,81 +5,91 @@ import (
 )
 
 type StexInfo struct {
-	AskPrice             float64
-	AskDollarPrice       float64
-	AskFixedDollarDemand float64
-	AskAmount            float64
-	BidPrice             float64
-	BidDollarPrice       float64
-	BidFixedDollarDemand float64
-	BidAmount            float64
+	AskWeightedPrice    float64
+	AskFixedUSDDemand   float64
+	AskWeightedUSDPrice float64
+	AskAmount           float64
+	BidWeightedPrice    float64
+	BidFixedUSDDemand   float64
+	BidWeightedUSDPrice float64
+	BidAmount           float64
 }
 
-func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, askFixedDollarDemand float64, bidFixedDollarDemand float64) {
-	s.CalAskPricePerFixedAmount(o, askFixedDollarDemand)
-	s.CalBidPricePerFixedAmount(o, bidFixedDollarDemand)
+func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, askFixedUSDDemand float64, bidFixedUSDDemand float64) {
+	s.CalAskPricePerFixedAmount(o, askFixedUSDDemand)
+	s.CalBidPricePerFixedAmount(o, bidFixedUSDDemand)
 }
 
-func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, askFixedDollarDemand float64) {
+func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, askFixedUSDDemand float64) {
 
-	var nextSpentAmount, spentAmount, price, dollarPrice float64
+	var nextSpentAmount, spentAmount, wPriceSum, usdPrice, wUSDPriceSum, sumAmount float64
 
 	for _, order := range o.Ask {
 		p, err := strconv.ParseFloat(order.Price, 64)
 		if err != nil {
-			s.AskPrice = 8888.88
+			s.AskWeightedPrice = 8888.88
 		}
-		price = p
-
 		amount, err := strconv.ParseFloat(order.Amount, 64)
 		if err != nil {
 			s.AskAmount = 9999.99
 		}
 
-		dollarPrice = 1 / p
-		nextSpentAmount += amount * dollarPrice
+		wPriceSum += p * amount
 
-		if nextSpentAmount > askFixedDollarDemand {
+		// next 2 rows below are the same as amount / price but is confusing AF....
+		usdPrice = 1 / p
+		wUSDPriceSum += usdPrice * amount
+
+		sumAmount += amount
+		nextSpentAmount += amount * usdPrice
+
+		if nextSpentAmount > askFixedUSDDemand {
 			break
 		} else {
 			spentAmount = nextSpentAmount
 		}
 	}
-	s.AskPrice = price
-	s.AskDollarPrice = dollarPrice
-	s.AskFixedDollarDemand = askFixedDollarDemand
+
+	s.AskWeightedPrice = wPriceSum / sumAmount
+	s.AskFixedUSDDemand = askFixedUSDDemand
+	s.AskWeightedUSDPrice = wUSDPriceSum / sumAmount
 	spentAmount = nextSpentAmount
 	s.AskAmount = spentAmount
 }
 
-func (s *StexInfo) CalBidPricePerFixedAmount(o OrderBookDetails, bidFixedDollarDemand float64) {
+func (s *StexInfo) CalBidPricePerFixedAmount(o OrderBookDetails, bidFixedUSDDemand float64) {
 
-	var nextSpentAmount, spentAmount, price, dollarPrice float64
+	var nextSpentAmount, spentAmount, wPriceSum, usdPrice, wUSDPriceSum, sumAmount float64
 
 	for _, order := range o.Bid {
 		p, err := strconv.ParseFloat(order.Price, 64)
 		if err != nil {
-			s.BidPrice = 8888.88
+			s.BidWeightedPrice = 8888.88
 		}
-		price = p
-
 		amount, err := strconv.ParseFloat(order.Amount, 64)
 		if err != nil {
 			s.BidAmount = 9999.9
 		}
 
-		dollarPrice = 1 / price
-		nextSpentAmount += amount * dollarPrice
+		wPriceSum += p * amount
 
-		if nextSpentAmount > bidFixedDollarDemand {
+		// next 2 rows below are the same as amount / price but is confusing AF....
+		usdPrice = 1 / p
+		wUSDPriceSum += usdPrice * amount
+
+		sumAmount += amount
+		nextSpentAmount += amount * usdPrice
+
+		if nextSpentAmount > bidFixedUSDDemand {
 			break
 		} else {
 			spentAmount = nextSpentAmount
 		}
 	}
-	s.BidPrice = price
-	s.BidDollarPrice = dollarPrice
-	s.BidFixedDollarDemand = bidFixedDollarDemand
+
+	s.BidWeightedPrice = wPriceSum / sumAmount
+	s.BidFixedUSDDemand = bidFixedUSDDemand
+	s.BidWeightedUSDPrice = wUSDPriceSum / sumAmount
 	spentAmount = nextSpentAmount
 	s.BidAmount = spentAmount
 }
