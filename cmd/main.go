@@ -2,16 +2,20 @@ package main
 
 import (
 	"crypto/internal/client"
+	"crypto/internal/gate"
+	"crypto/internal/server"
+	"crypto/internal/stex"
+)
+
+var (
+	gatePriceInfo gate.GateInfo
+	stexPriceInfo stex.StexInfo
 )
 
 func main() {
 
-	// uncomment to have the user point to a config
-	// conf, err := configs.LoadConfigFromInput()
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	client.StartPlaftormsClient()
-	// http.ListenAndServe(":8080", nil)
+	go client.StartPlaftormsClient(&gatePriceInfo, &stexPriceInfo)
+	r := server.Server(&gatePriceInfo, &stexPriceInfo)
+	r.Run(":8080")
 
 }

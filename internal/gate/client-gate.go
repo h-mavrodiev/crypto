@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -40,6 +41,8 @@ func (c *GateClient) SendRequest(
 	}
 
 	defer res.Body.Close()
+
+	log.Printf("| %s %s -> GATE request ... \n", res.Request.Method, res.Status)
 
 	// Try to unmarshal into errorResponse
 	if res.StatusCode != http.StatusOK {

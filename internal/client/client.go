@@ -4,14 +4,13 @@ import (
 	"crypto/configs"
 	"crypto/internal/gate"
 	"crypto/internal/stex"
-	"encoding/json"
 	"fmt"
 )
 
 var (
-	c             Clients = loadClients()
-	gatePriceInfo gate.GateInfo
-	stexPriceInfo stex.StexInfo
+	c Clients = loadClients()
+	// gatePriceInfo gate.GateInfo
+	// stexPriceInfo stex.StexInfo
 )
 
 // Loads configuration yml for clients and returns Clients struct
@@ -26,7 +25,7 @@ func loadClients() Clients {
 	return c
 }
 
-func StartPlaftormsClient() {
+func StartPlaftormsClient(gatePriceInfo *gate.GateInfo, stexPriceInfo *stex.StexInfo) {
 	// Those channels were never closed... find out if you should actually close them ...
 	gateOrders := make(chan gate.OrderBookDetails)
 	stexOrders := make(chan stex.OrderBookDetails)
@@ -37,15 +36,15 @@ func StartPlaftormsClient() {
 	for {
 		select {
 		case gateOrder := <-gateOrders:
-			fmt.Println("GATE")
 			gatePriceInfo.CalcPriceAndVolume(gateOrder, 20, 20)
-			print, _ := json.Marshal(gatePriceInfo)
-			fmt.Println(string(print))
+			// fmt.Println("GATE")
+			// print, _ := json.Marshal(gatePriceInfo)
+			// fmt.Println(string(print))
 		case stexOrder := <-stexOrders:
 			stexPriceInfo.CalcPriceAndVolume(stexOrder, 20, 20)
-			fmt.Println("STEX")
-			print, _ := json.Marshal(stexPriceInfo)
-			fmt.Println(string(print))
+			// fmt.Println("STEX")
+			// print, _ := json.Marshal(stexPriceInfo)
+			// fmt.Println(string(print))
 		}
 	}
 }
