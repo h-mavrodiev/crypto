@@ -1,31 +1,45 @@
 .App {
   text-align: center;
-  /* display: flex;
-  flex-direction: column; */
+  display: flex;
+  flex-direction: row;
   background-color: #282c34;
   min-height: 100vh;
+  padding: 20px;
 }
 
-.Gate-caption-element {
-  /* border-radius: 0.5em; */
-  text-align: center;
-  color: #C678DD;
-  border: 3px solid #C678DD;
-  /* padding: 0.5em; */
-}
+.More-panel {
+  border-radius: 0.5em;
+  color: #E06C75;
+  width: 20%;
+  padding: 10px;
+  border: 3px solid #E06C75;
+  margin:10px;
 
-.Stex-caption-element {
-  /* border-radius: 0.5em; */
-  text-align: center;
-  color: #98C379;
-  border: 3px solid #98C379;
-  /* padding: 0.5em; */
 }
 
 .Wallet-caption-element {
-  /* border-radius: 0.5em; */
   text-align: center;
-  color: #e06c75;
+  color: #E06C75;
+}
+
+.Platform-panel {
+  border-radius: 0.5em;
+  color: #E06C75;
   border: 3px solid #E06C75;
-  /* padding: 0.5em; */
+  width: 80%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+}
+
+.Gate-caption-element {
+  text-align: center;
+  color: #C678DD;
+}
+
+
+.Stex-caption-element {
+  text-align: center;
+  color: #98C379;
 }

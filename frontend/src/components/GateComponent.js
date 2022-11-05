@@ -10,64 +10,48 @@ const sleep = ms => new Promise(
 );
 
 const columns = [{
-    dataField: 'AskFixedUSDDemand',
-    text: 'Ask Fixed USD Demand',
+    dataField: 'IWannaBuyFor',
+    text: '$',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
       border: '2px solid #c678dd'
     }
   },{
-    dataField: 'AskWeightedPrice',
-    text: 'Ask Weighted Price',
+    dataField: 'TheySellForWeightedUSD',
+    text: 'Price per $ (W)',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
       border: '2px solid #c678dd'
     }
   },  {
-    dataField: 'AskWeightedUSDPrice',
-    text: 'Ask Weighted USD Price',
+    dataField: 'ICanBuy',
+    text: 'I Can Buy',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
       border: '2px solid #c678dd'
     }
   }, {
-    dataField: 'AskAmount',
-    text: 'Ask Amount',
+    dataField: 'TheySellForWeighted',
+    text: 'They Sell For (W)',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
       border: '2px solid #c678dd'
     }
   }, {
-    dataField: 'BidFixedUSDDemand',
-    text: 'Bid Fixed USD Demand',
+    dataField: 'ICanSellFromStex',
+    text: 'I Can Sell From Stex',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
       border: '2px solid #c678dd'
     }
   },{
-    dataField: 'BidWeightedPrice',
-    text: 'Bid Weighted Price',
-    style: {color:'#c678dd'},
-    headerStyle: {
-      color: '#c678dd',
-      border: '2px solid #c678dd'
-    }
-  }, {
-    dataField: 'BidWeightedUSDPrice',
-    text: 'Bid Weighted USD Price',
-    style: {color:'#c678dd'},
-    headerStyle: {
-      color: '#c678dd',
-      border: '2px solid #c678dd'
-    }
-  }, {
-    dataField: 'BidAmount',
-    text: 'Bid Amount',
+    dataField: 'ICanSellFromStexForWeighted',
+    text: 'I Can Sell From Stex For',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',

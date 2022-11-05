@@ -9,64 +9,48 @@ const sleep = ms => new Promise(
   );
 
 const columns = [{
-    dataField: 'AskFixedUSDDemand',
-    text: 'Ask Fixed USD Demand',
+    dataField: 'IWannaBuyFor',
+    text: '$',
+    style: {color:'#98c379'},
+    headerStyle: {
+        color: '#98c379',
+        border: '2px solid #98c379'
+      }
+  }, {
+    dataField: 'TheySellForWeightedUSD',
+    text: 'Price per $ (W)',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',
         border: '2px solid #98c379'
       }
   },{
-    dataField: 'AskWeightedPrice',
-    text: 'Ask Weighted Price',
-    style: {color:'#98c379'},
-    headerStyle: {
-        color: '#98c379',
-        border: '2px solid #98c379'
-      }
-  },  {
-    dataField: 'AskWeightedUSDPrice',
-    text: 'Ask Weighted USD Price',
-    style: {color:'#98c379'},
-    headerStyle: {
-        color: '#98c379',
-        border: '2px solid #98c379'
-      }
-  }, {
-    dataField: 'AskAmount',
-    text: 'Ask Amount',
-    style: {color:'#98c379'},
-    headerStyle: {
-        color: '#98c379',
-        border: '2px solid #98c379'
-      }
-  }, {
-    dataField: 'BidFixedUSDDemand',
-    text: 'Bid Fixed USD Demand',
+    dataField: 'ICanBuy',
+    text: 'I Can Buy',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',
         border: '2px solid #98c379'
       }
   },{
-    dataField: 'BidWeightedPrice',
-    text: 'Bid Weighted Price',
+    dataField: 'TheySellForWeighted',
+    text: 'They Sell For (W)',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',
         border: '2px solid #98c379'
       }
   }, {
-    dataField: 'BidWeightedUSDPrice',
-    text: 'Bid Weighted USD Price',
+    dataField: 'ICanSellFromGate',
+    text: 'I Can Sell From Gate',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',
         border: '2px solid #98c379'
       }
   }, {
-    dataField: 'BidAmount',
-    text: 'Bid Amount',
+    dataField: 'ICanSellFromGateForWeighted',
+    text: 'I Can Sell From Gate For',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',

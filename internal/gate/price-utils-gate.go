@@ -5,91 +5,82 @@ import (
 )
 
 type GateInfo struct {
-	AskWeightedPrice    float64
-	AskFixedUSDDemand   float64
-	AskWeightedUSDPrice float64
-	AskAmount           float64
-	BidWeightedPrice    float64
-	BidFixedUSDDemand   float64
-	BidWeightedUSDPrice float64
-	BidAmount           float64
+	IWannaBuyFor                float64
+	TheySellForWeightedUSD      float64
+	ICanBuy                     float64
+	TheySellForWeighted         float64
+	ICanSellFromStex            float64
+	ICanSellFromStexForWeighted float64
 }
 
-func (g *GateInfo) CalcPriceAndVolume(o OrderBookDetails, askFixedUSDDemand float64, bidFixedUSDDemand float64) {
-	g.CalAskPricePerFixedAmount(o, askFixedUSDDemand)
-	g.CalBidPricePerFixedAmount(o, bidFixedUSDDemand)
+func (g *GateInfo) CalcPriceAndVolume(o OrderBookDetails, myUSDAmount float64, crossPlatfromMyAmount float64) {
+	g.CalAskPricePerFixedAmount(o, myUSDAmount)
+	g.CalBidPricePerFixedAmount(o, crossPlatfromMyAmount)
 }
 
-func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, askFixedUSDDemand float64) {
+func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, iWannaBuyFor float64) {
 
-	var nextSpentAmount, spentAmount, wPriceSum, usdPrice, wUSDPriceSum, sumAmount float64
+	var iCanBuy, wUSDPrice, wPrice, wUSDPriceSum, wPriceSum, sumAmount float64
 
 	for _, order := range o.Asks {
-		p, err := strconv.ParseFloat(order[0], 64)
+		price, err := strconv.ParseFloat(order[0], 64)
 		if err != nil {
-			g.AskWeightedPrice = 8888.88
+			g.TheySellForWeighted = 8888.88
 		}
 		amount, err := strconv.ParseFloat(order[1], 64)
 		if err != nil {
-			g.AskAmount = 9999.99
+			g.ICanBuy = 9999.99
 		}
 
-		wPriceSum += p * amount
-
-		// next 2 rows below are the same as amount / price but is confusing AF....
-		usdPrice = 1 / p
-		wUSDPriceSum += usdPrice * amount
-
-		sumAmount += amount
-		nextSpentAmount += amount * usdPrice
-
-		if nextSpentAmount > askFixedUSDDemand {
-			break
+		// x*E = 20$ => x = 20*usdPrice
+		usdPrice := 1 / price
+		if wUSDPrice == 0 {
+			iCanBuy = iWannaBuyFor * usdPrice
 		} else {
-			spentAmount = nextSpentAmount
+			iCanBuy = iWannaBuyFor * wUSDPrice
+		}
+
+		// In this case the amount is the weight for the price
+		sumAmount += amount
+		wPriceSum += price * amount
+		wUSDPriceSum += usdPrice * amount
+		wPrice = wPriceSum / sumAmount
+		wUSDPrice = wUSDPriceSum / sumAmount
+
+		if iCanBuy < sumAmount {
+			break
 		}
 	}
 
-	g.AskWeightedPrice = wPriceSum / sumAmount
-	g.AskFixedUSDDemand = askFixedUSDDemand
-	g.AskWeightedUSDPrice = wUSDPriceSum / sumAmount
-	spentAmount = nextSpentAmount
-	g.AskAmount = spentAmount
+	g.IWannaBuyFor = iWannaBuyFor
+	g.TheySellForWeightedUSD = wUSDPrice
+	g.ICanBuy = iCanBuy
+	g.TheySellForWeighted = wPrice
 }
 
-func (g *GateInfo) CalBidPricePerFixedAmount(o OrderBookDetails, bidFixedUSDDemand float64) {
+func (g *GateInfo) CalBidPricePerFixedAmount(o OrderBookDetails, MyAmountStex float64) {
 
-	var nextSpentAmount, spentAmount, wPriceSum, usdPrice, wUSDPriceSum, sumAmount float64
+	var wPrice, wPriceSum, sumAmount float64
 
 	for _, order := range o.Bids {
-		p, err := strconv.ParseFloat(order[0], 64)
+		price, err := strconv.ParseFloat(order[0], 64)
 		if err != nil {
-			g.BidWeightedPrice = 8888.88
+			g.ICanSellFromStexForWeighted = 8888.88
 		}
 		amount, err := strconv.ParseFloat(order[1], 64)
 		if err != nil {
-			g.BidAmount = 9999.9
+			g.ICanSellFromStex = 9999.9
 		}
-
-		wPriceSum += p * amount
-
-		// next 2 rows below are the same as amount / price but is confusing AF....
-		usdPrice = 1 / p
-		wUSDPriceSum += usdPrice * amount
 
 		sumAmount += amount
-		nextSpentAmount += amount * usdPrice
+		wPriceSum += price * amount
+		wPrice = wPriceSum / sumAmount
 
-		if nextSpentAmount > bidFixedUSDDemand {
+		if sumAmount > MyAmountStex {
 			break
-		} else {
-			spentAmount = nextSpentAmount
 		}
 	}
+	g.ICanSellFromStex = MyAmountStex
+	g.ICanSellFromStexForWeighted = wPrice
 
-	g.BidWeightedPrice = wPriceSum / sumAmount
-	g.BidFixedUSDDemand = bidFixedUSDDemand
-	g.BidWeightedUSDPrice = wUSDPriceSum / sumAmount
-	spentAmount = nextSpentAmount
-	g.BidAmount = spentAmount
 }
