@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -43,6 +44,8 @@ func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 	}
 
 	defer res.Body.Close()
+
+	log.Printf("| %s %s -> STEX request ... \n", res.Request.Method, res.Status)
 
 	// Try to unmarshal into errorResponse
 	if res.StatusCode != http.StatusOK {

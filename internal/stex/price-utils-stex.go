@@ -1,75 +1,85 @@
 package stex
 
 import (
-	"fmt"
 	"strconv"
-	"sync"
 )
 
 type StexInfo struct {
-	AskPrice  string
-	AskAmount string
-	BidPrice  string
-	BidAmount string
+	IWannaBuyFor                float64
+	TheySellForWeightedUSD      float64
+	ICanBuy                     float64
+	TheySellForWeighted         float64
+	ICanSellFromGate            float64
+	ICanSellFromGateForWeighted float64
 }
 
-func (s *StexInfo) UpdateStexVisualizeInfo(askPrice string, askAmount string, bidPrice string, bidAmount string) {
-	s.AskPrice = askPrice
-	s.AskAmount = askAmount
-	s.BidPrice = bidPrice
-	s.BidAmount = bidAmount
+func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, askFixedUSDDemand float64, bidFixedUSDDemand float64) {
+	s.CalAskPricePerFixedAmount(o, askFixedUSDDemand)
+	s.CalBidPricePerFixedAmount(o, bidFixedUSDDemand)
 }
 
-func (o *OrderBookDetails) FindPriceAndVolume(volumeByPrice float64) *StexInfo {
+func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, iWannaBuyFor float64) {
 
-	var (
-		priceOrderAsk       string
-		sumOrdersVolumesAsk float64
-		priceOrderBid       string
-		sumOrderVolumeBid   float64
-	)
-	wg := sync.WaitGroup{}
+	var iCanBuy, wUSDPrice, wPrice, wUSDPriceSum, wPriceSum, sumAmount float64
 
-	for sumOrdersVolumesAsk < volumeByPrice {
+	for _, order := range o.Ask {
+		price, err := strconv.ParseFloat(order.Price, 64)
+		if err != nil {
+			s.TheySellForWeighted = 8888.88
+		}
+		amount, err := strconv.ParseFloat(order.Amount, 64)
+		if err != nil {
+			s.ICanBuy = 9999.99
+		}
 
-		wg.Add(1)
-		go func(wg *sync.WaitGroup) {
-			defer wg.Done()
-			for _, order := range o.Ask {
-				s, err := strconv.ParseFloat(order.Amount, 64)
-				if err != nil {
-					priceOrderAsk = "Error Parsing Price"
-					break
-				}
-				if sumOrdersVolumesAsk < volumeByPrice {
-					sumOrdersVolumesAsk = sumOrdersVolumesAsk + s
-				}
-				priceOrderAsk = order.Price
-			}
-		}(&wg)
+		// x*E = 20$ => x = 20*usdPrice
+		usdPrice := 1 / price
+		if wUSDPrice == 0 {
+			iCanBuy = iWannaBuyFor * usdPrice
+		} else {
+			iCanBuy = iWannaBuyFor * wUSDPrice
+		}
 
-		wg.Add(1)
-		go func(wg *sync.WaitGroup) {
-			defer wg.Done()
-			for _, order := range o.Bid {
-				s, err := strconv.ParseFloat(order.Amount, 64)
-				if err != nil {
-					priceOrderBid = "Error Parsing Price"
-					break
-				}
-				if sumOrdersVolumesAsk < volumeByPrice {
-					sumOrderVolumeBid = sumOrderVolumeBid + s
-				}
-				priceOrderBid = order.Price
-			}
-		}(&wg)
+		// In this case the amount is the weight for the price
+		sumAmount += amount
+		wPriceSum += price * amount
+		wUSDPriceSum += usdPrice * amount
+		wPrice = wPriceSum / sumAmount
+		wUSDPrice = wUSDPriceSum / sumAmount
+
+		if iCanBuy < sumAmount {
+			break
+		}
 	}
-	wg.Wait()
 
-	return &StexInfo{
-		AskPrice:  priceOrderAsk,
-		AskAmount: fmt.Sprintf("%f", sumOrdersVolumesAsk),
-		BidPrice:  priceOrderBid,
-		BidAmount: fmt.Sprintf("%f", sumOrderVolumeBid),
+	s.IWannaBuyFor = iWannaBuyFor
+	s.TheySellForWeightedUSD = wUSDPrice
+	s.ICanBuy = iCanBuy
+	s.TheySellForWeighted = wPrice
+}
+
+func (s *StexInfo) CalBidPricePerFixedAmount(o OrderBookDetails, MyAmountGate float64) {
+
+	var wPrice, wPriceSum, sumAmount float64
+
+	for _, order := range o.Bid {
+		price, err := strconv.ParseFloat(order.Price, 64)
+		if err != nil {
+			s.ICanSellFromGateForWeighted = 8888.88
+		}
+		amount, err := strconv.ParseFloat(order.Amount, 64)
+		if err != nil {
+			s.ICanSellFromGate = 9999.9
+		}
+
+		sumAmount += amount
+		wPriceSum += price * amount
+		wPrice = wPriceSum / sumAmount
+
+		if sumAmount > MyAmountGate {
+			break
+		}
 	}
+	s.ICanSellFromGate = MyAmountGate
+	s.ICanSellFromGateForWeighted = wPrice
 }
