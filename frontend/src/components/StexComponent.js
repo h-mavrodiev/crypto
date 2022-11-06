@@ -70,14 +70,15 @@ function StexInfo(){
     const [stexInfo, setStexInfo] = useState([]);
     useEffect(() => {loadGateInfo()});
 
-    return <BootstrapTable bootstrap4
-    keyField="AskFixedUSDDemand" 
-    data={ stexInfo }
-    caption={<StexCaptionElement/>}
-    condensed
-    striped
-    columns={ columns }
-    rowStyle= {{border: '2px solid #98c379'}} />
+    return <BootstrapTable 
+            bootstrap4
+            keyField="IWannaBuyFor" 
+            data={ stexInfo }
+            caption={<StexCaptionElement/>}
+            condensed
+            striped
+            columns={ columns }
+            rowStyle= {{border: '2px solid #98c379'}} />
 }
 
 export default StexInfo;
