@@ -71,16 +71,15 @@ function GateInfo(){
     const [gateInfo, setGateInfo] = useState([]);
     useEffect(() => {loadGateInfo()});
 
-    return <BootstrapTable 
-    className='Gate-Table'
-    bootstrap4 
-    keyField="AskFixedUSDDemand" 
-    data={ gateInfo } 
-    condensed
-    striped 
-    caption={<GateCaptionElement/>}
-    columns={ columns }
-    rowStyle= {{border: '2px solid #c678dd'}}/>
+    return <BootstrapTable
+            bootstrap4 
+            keyField="IWannaBuyFor" 
+            data={ gateInfo } 
+            condensed
+            striped 
+            caption={<GateCaptionElement/>}
+            columns={ columns }
+            rowStyle= {{border: '2px solid #c678dd'}}/>
 }
 
 export default GateInfo;

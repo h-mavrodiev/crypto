@@ -13,9 +13,9 @@ type StexInfo struct {
 	ICanSellFromGateForWeighted float64
 }
 
-func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, askFixedUSDDemand float64, bidFixedUSDDemand float64) {
-	s.CalAskPricePerFixedAmount(o, askFixedUSDDemand)
-	s.CalBidPricePerFixedAmount(o, bidFixedUSDDemand)
+func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, IWannaBuyFor float64, MyAmountGate float64) {
+	s.CalAskPricePerFixedAmount(o, IWannaBuyFor)
+	s.CalBidPricePerFixedAmount(o, MyAmountGate)
 }
 
 func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, iWannaBuyFor float64) {

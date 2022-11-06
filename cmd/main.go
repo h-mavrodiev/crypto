@@ -1,38 +1,30 @@
 package main
 
 import (
+	"crypto/internal/arbitrage"
 	"crypto/internal/client"
 	"crypto/internal/gate"
 	"crypto/internal/server"
 	"crypto/internal/stex"
-	"log"
+	"fmt"
 )
 
 var (
-	gatePriceInfo gate.GateInfo
-	stexPriceInfo stex.StexInfo
+	GateToStex            float64
+	StexToGate            float64
+	gatePriceInfo         gate.GateInfo
+	stexPriceInfo         stex.StexInfo
+	ArbitrageResponseList []arbitrage.ArbitrageInfo
 )
-
-func printArbitrage(gatePriceInfo *gate.GateInfo, stexPriceInfo *stex.StexInfo) {
-
-	percentGate := (gatePriceInfo.TheySellForWeighted - gatePriceInfo.ICanSellFromStexForWeighted) * 100 / gatePriceInfo.ICanSellFromStexForWeighted
-	percantStex := (stexPriceInfo.TheySellForWeighted - stexPriceInfo.ICanSellFromGateForWeighted) * 100 / stexPriceInfo.ICanSellFromGateForWeighted
-
-	for {
-		switch {
-		case percentGate > 1:
-			log.Println("$$$$$$$$$$$$$$$$$$$ STEX ---> GATE ARBITRAGE $$$$$$$$$$$$$$$$$$$")
-		case percantStex > 1:
-			log.Println("$$$$$$$$$$$$$$$$$$$ GATE ---> STEX ARBITRAGE $$$$$$$$$$$$$$$$$$$")
-		}
-	}
-}
 
 func main() {
 
-	go printArbitrage(&gatePriceInfo, &stexPriceInfo)
+	go arbitrage.ExecuteArbitrage(&gatePriceInfo, &stexPriceInfo, &ArbitrageResponseList, &GateToStex, &StexToGate)
 	go client.StartPlaftormsClient(&gatePriceInfo, &stexPriceInfo)
-	r := server.Server(&gatePriceInfo, &stexPriceInfo)
+	fmt.Println(ArbitrageResponseList)
+	fmt.Println("HI")
+
+	r := server.Server(&gatePriceInfo, &stexPriceInfo, &ArbitrageResponseList)
 	r.Run(":8080")
 
 }

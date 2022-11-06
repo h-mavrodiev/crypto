@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/internal/arbitrage"
 	"crypto/internal/gate"
 	"crypto/internal/stex"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Server(gatePriceInfo *gate.GateInfo, stexPriceInfo *stex.StexInfo) *gin.Engine {
+func Server(gatePriceInfo *gate.GateInfo, stexPriceInfo *stex.StexInfo, arbList *[]arbitrage.ArbitrageInfo) *gin.Engine {
 	router := gin.Default()
 
 	// Query string parameters are parsed using the existing underlying request object.
@@ -21,6 +22,11 @@ func Server(gatePriceInfo *gate.GateInfo, stexPriceInfo *stex.StexInfo) *gin.Eng
 	router.GET("/stex", func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.JSON(http.StatusOK, &stexPriceInfo)
+	})
+
+	router.GET("/arbitrage", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.JSON(http.StatusOK, &arbList)
 	})
 
 	return router
