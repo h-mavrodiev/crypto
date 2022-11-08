@@ -11,20 +11,12 @@ type ArbitrageInfo struct {
 	Arbitrage float64
 }
 
-func prepareArbitrageInfo() {
-	for {
-
-		// print, _ := json.Marshal(ArbitrageResponseList)
-		// fmt.Println(string(print))
-	}
-}
-
-func CalculateArbitrage(ICanSellFromForValue float64, TheySellForValue float64) float64 {
-
+func CalculateArbitrage(sellsPrice float64, buysPrice float64) float64 {
+	// how much the buy price is bigger compared to the sell price?
 	// (a-b)*100 / a  to find percentage diff
 	// This way when there is no arbitrage, the percentage value is always negative
-	return (ICanSellFromForValue - TheySellForValue) * 100 /
-		ICanSellFromForValue
+	return (buysPrice - sellsPrice) * 100 /
+		buysPrice
 
 }
 
@@ -36,8 +28,8 @@ func ExecuteArbitrage(gatePriceInfo *gate.GateInfo,
 
 	for {
 
-		*GateToStex = CalculateArbitrage(gatePriceInfo.ICanSellFromStexForWeighted, gatePriceInfo.TheySellForWeighted)
-		*StexToGate = CalculateArbitrage(stexPriceInfo.ICanSellFromGateForWeighted, stexPriceInfo.TheySellForWeighted)
+		*GateToStex = CalculateArbitrage(gatePriceInfo.Sells, stexPriceInfo.Buys)
+		*StexToGate = CalculateArbitrage(stexPriceInfo.Sells, gatePriceInfo.Buys)
 		*ArbitrageResponseList = []ArbitrageInfo{{Platforms: "Gate to Stex", Arbitrage: *GateToStex},
 			{Platforms: "Stex to Gate", Arbitrage: *StexToGate}}
 

@@ -5,82 +5,94 @@ import (
 )
 
 type GateInfo struct {
-	IWannaBuyFor                float64
-	TheySellForWeightedUSD      float64
-	ICanBuy                     float64
-	TheySellForWeighted         float64
-	ICanSellFromStex            float64
-	ICanSellFromStexForWeighted float64
+	Sells       float64
+	SellsVolume float64
+	Buys        float64
+	BuysVolume  float64
 }
 
-func (g *GateInfo) CalcPriceAndVolume(o OrderBookDetails, myUSDAmount float64, crossPlatfromMyAmount float64) {
-	g.CalAskPricePerFixedAmount(o, myUSDAmount)
-	g.CalBidPricePerFixedAmount(o, crossPlatfromMyAmount)
+func (g *GateInfo) CalcPriceAndVolume(o OrderBookDetails, minTrade float64) {
+	g.CalAskPricePerFixedAmount(o, minTrade)
+	g.CalBidPricePerFixedAmount(o, minTrade)
 }
 
-func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, iWannaBuyFor float64) {
+func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
 
-	var iCanBuy, wUSDPrice, wPrice, wUSDPriceSum, wPriceSum, sumAmount float64
+	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Asks {
 		price, err := strconv.ParseFloat(order[0], 64)
 		if err != nil {
-			g.TheySellForWeighted = 8888.88
+			g.Sells = 8888.88
 		}
-		amount, err := strconv.ParseFloat(order[1], 64)
+		volume, err := strconv.ParseFloat(order[1], 64)
 		if err != nil {
-			g.ICanBuy = 9999.99
+			g.SellsVolume = 9999.99
 		}
+		sumVolume += volume
 
-		// x*E = 20$ => x = 20*usdPrice
+		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			iCanBuy = iWannaBuyFor * usdPrice
+			minTradeVolume = minTrade * usdPrice
 		} else {
-			iCanBuy = iWannaBuyFor * wUSDPrice
+			minTradeVolume = minTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price
-		sumAmount += amount
-		wPriceSum += price * amount
-		wUSDPriceSum += usdPrice * amount
-		wPrice = wPriceSum / sumAmount
-		wUSDPrice = wUSDPriceSum / sumAmount
+		wPriceSum += price * volume
+		wUSDPriceSum += usdPrice * volume
 
-		if iCanBuy < sumAmount {
+		wPrice = wPriceSum / sumVolume
+		wUSDPrice = wUSDPriceSum / sumVolume
+
+		if sumVolume >= minTradeVolume {
+			g.Sells = wPrice
+			g.SellsVolume = sumVolume
 			break
 		}
+
 	}
 
-	g.IWannaBuyFor = iWannaBuyFor
-	g.TheySellForWeightedUSD = wUSDPrice
-	g.ICanBuy = iCanBuy
-	g.TheySellForWeighted = wPrice
 }
 
-func (g *GateInfo) CalBidPricePerFixedAmount(o OrderBookDetails, MyAmountStex float64) {
+func (g *GateInfo) CalBidPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
 
-	var wPrice, wPriceSum, sumAmount float64
+	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Bids {
 		price, err := strconv.ParseFloat(order[0], 64)
 		if err != nil {
-			g.ICanSellFromStexForWeighted = 8888.88
+			g.Buys = 8888.88
 		}
-		amount, err := strconv.ParseFloat(order[1], 64)
+		volume, err := strconv.ParseFloat(order[1], 64)
 		if err != nil {
-			g.ICanSellFromStex = 9999.9
+			g.BuysVolume = 9999.9
 		}
 
-		sumAmount += amount
-		wPriceSum += price * amount
-		wPrice = wPriceSum / sumAmount
+		sumVolume += volume
 
-		if sumAmount > MyAmountStex {
+		// USD/ETH * USD
+		usdPrice := 1 / price
+		if wUSDPrice == 0 {
+			minTradeVolume = minTrade * usdPrice
+		} else {
+			minTradeVolume = minTrade * wUSDPrice
+		}
+
+		// In this case the amount is the weight for the price
+		wPriceSum += price * volume
+		wUSDPriceSum += usdPrice * volume
+
+		wPrice = wPriceSum / sumVolume
+		wUSDPrice = wUSDPriceSum / sumVolume
+
+		if sumVolume >= minTradeVolume {
+			g.Buys = wPrice
+			g.BuysVolume = sumVolume
 			break
 		}
+
 	}
-	g.ICanSellFromStex = MyAmountStex
-	g.ICanSellFromStexForWeighted = wPrice
 
 }

@@ -36,12 +36,12 @@ func StartPlaftormsClient(gatePriceInfo *gate.GateInfo, stexPriceInfo *stex.Stex
 	for {
 		select {
 		case gateOrder := <-gateOrders:
-			gatePriceInfo.CalcPriceAndVolume(gateOrder, 20, stexPriceInfo.ICanBuy)
+			gatePriceInfo.CalcPriceAndVolume(gateOrder, 1)
 			// fmt.Println("GATE")
 			// print, _ := json.Marshal(gatePriceInfo)
 			// fmt.Println(string(print))
 		case stexOrder := <-stexOrders:
-			stexPriceInfo.CalcPriceAndVolume(stexOrder, 20, gatePriceInfo.ICanBuy)
+			stexPriceInfo.CalcPriceAndVolume(stexOrder, 1)
 			// fmt.Println("STEX")
 			// print, _ := json.Marshal(stexPriceInfo)
 			// fmt.Println(string(print))

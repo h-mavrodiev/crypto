@@ -10,48 +10,32 @@ const sleep = ms => new Promise(
 );
 
 const columns = [{
-    dataField: 'IWannaBuyFor',
-    text: '$',
+    dataField: 'Sells',
+    text: 'Sells',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
       border: '2px solid #c678dd'
     }
   },{
-    dataField: 'TheySellForWeightedUSD',
-    text: 'Price per $ (W)',
+    dataField: 'SellsVolume',
+    text: 'Sells Volume',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
       border: '2px solid #c678dd'
     }
   },  {
-    dataField: 'ICanBuy',
-    text: 'I Can Buy',
+    dataField: 'Buys',
+    text: 'Buys',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
       border: '2px solid #c678dd'
     }
   }, {
-    dataField: 'TheySellForWeighted',
-    text: 'They Sell For (W)',
-    style: {color:'#c678dd'},
-    headerStyle: {
-      color: '#c678dd',
-      border: '2px solid #c678dd'
-    }
-  }, {
-    dataField: 'ICanSellFromStex',
-    text: 'I Can Sell From Stex',
-    style: {color:'#c678dd'},
-    headerStyle: {
-      color: '#c678dd',
-      border: '2px solid #c678dd'
-    }
-  },{
-    dataField: 'ICanSellFromStexForWeighted',
-    text: 'I Can Sell From Stex For',
+    dataField: 'BuysVolume',
+    text: 'Buys Volume',
     style: {color:'#c678dd'},
     headerStyle: {
       color: '#c678dd',
@@ -73,7 +57,7 @@ function GateInfo(){
 
     return <BootstrapTable
             bootstrap4 
-            keyField="IWannaBuyFor" 
+            keyField="Sells" 
             data={ gateInfo } 
             condensed
             striped 
