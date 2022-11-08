@@ -9,48 +9,32 @@ const sleep = ms => new Promise(
   );
 
 const columns = [{
-    dataField: 'IWannaBuyFor',
-    text: '$',
+    dataField: 'Sells',
+    text: 'Sells',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',
         border: '2px solid #98c379'
       }
   }, {
-    dataField: 'TheySellForWeightedUSD',
-    text: 'Price per $ (W)',
+    dataField: 'SellsVolume',
+    text: 'Sells Volume',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',
         border: '2px solid #98c379'
       }
   },{
-    dataField: 'ICanBuy',
-    text: 'I Can Buy',
+    dataField: 'Buys',
+    text: 'Buys',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',
         border: '2px solid #98c379'
       }
   },{
-    dataField: 'TheySellForWeighted',
-    text: 'They Sell For (W)',
-    style: {color:'#98c379'},
-    headerStyle: {
-        color: '#98c379',
-        border: '2px solid #98c379'
-      }
-  }, {
-    dataField: 'ICanSellFromGate',
-    text: 'I Can Sell From Gate',
-    style: {color:'#98c379'},
-    headerStyle: {
-        color: '#98c379',
-        border: '2px solid #98c379'
-      }
-  }, {
-    dataField: 'ICanSellFromGateForWeighted',
-    text: 'I Can Sell From Gate For',
+    dataField: 'BuysVolume',
+    text: 'BuysVolume',
     style: {color:'#98c379'},
     headerStyle: {
         color: '#98c379',
@@ -72,7 +56,7 @@ function StexInfo(){
 
     return <BootstrapTable 
             bootstrap4
-            keyField="IWannaBuyFor" 
+            keyField="Sells" 
             data={ stexInfo }
             caption={<StexCaptionElement/>}
             condensed
