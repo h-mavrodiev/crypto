@@ -7,6 +7,7 @@ type GateConfig struct {
 	APISecret     string            `yaml:"apiSecret"`
 	Endpoints     GateEndpoints     `yaml:"endpoints"`
 	CommonHeaders GateCommonHeaders `yaml:"commonHeaders"`
+	WS            WS                `yaml:"ws"`
 }
 
 type GateEndpoints struct {
@@ -42,4 +43,10 @@ type StexCommonHeaders struct {
 type Config struct {
 	Gate GateConfig `yaml:"gate"`
 	Stex StexConfig `yaml:"stex"`
+}
+
+type WS struct {
+	Schema string `yaml:"schema"`
+	Host   string `yaml:"host"`
+	Path   string `yaml:"path"`
 }

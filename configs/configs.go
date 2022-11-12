@@ -2,36 +2,37 @@ package configs
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/viper"
 )
 
-var vp *viper.Viper
+var (
+	vp   *viper.Viper
+	Conf Config
+)
 
-func LoadConfig(cn string, ct string, cp string) (Config, error) {
+func LoadConfig(cn string, ct string, cp string) error {
 	vp = viper.New()
-	var config Config
 
 	vp.SetConfigName(cn)
 	vp.SetConfigType(ct)
 	vp.AddConfigPath(cp)
 	err := vp.ReadInConfig()
 	if err != nil {
-		return Config{}, err
+		return err
 	}
 
-	err = vp.Unmarshal(&config)
+	err = vp.Unmarshal(&Conf)
 	if err != nil {
-		return Config{}, err
+		return err
 	}
 
-	return config, nil
+	return nil
 }
 
 // ReadInput reads input from user
-func LoadConfigFromInput() (Config, error) {
+func LoadConfigFromInput() error {
 	var cn, ct, cp string
 	var err error
 
@@ -39,12 +40,12 @@ func LoadConfigFromInput() (Config, error) {
 	_, err = fmt.Scanln(&cp)
 	if err != nil {
 		fmt.Printf("No path was provided...\n")
-		log.Fatal(err)
+		return err
 	} else {
 		// Check if directory exists
 		_, err := os.Stat(cp)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 
@@ -52,20 +53,21 @@ func LoadConfigFromInput() (Config, error) {
 	_, err = fmt.Scanln(&cn)
 	if err != nil {
 		fmt.Printf("No name was provided...\n")
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Println("config file type: ")
 	_, err = fmt.Scanln(&ct)
 	if err != nil {
 		fmt.Printf("No type was provided...\n")
-		log.Fatal(err)
+		return err
 	}
 
-	conf, err := LoadConfig(cn, ct, cp)
+	err = LoadConfig(cn, ct, cp)
 	if err != nil {
-		return Config{}, err
+		fmt.Printf("No name was provided...\n")
+		return err
 	}
 
-	return conf, nil
+	return nil
 }

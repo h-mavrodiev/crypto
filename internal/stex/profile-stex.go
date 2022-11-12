@@ -11,7 +11,7 @@ func (c *StexClient) GetProfileInfo(ch chan<- interface{}) error {
 		return errors.New("faild create get request for stex profile info")
 	}
 
-	c.Authenticate(req)
+	authenticate(c, req)
 
 	res := InfoData{}
 	if err = c.SendRequest(req, &res); err != nil {

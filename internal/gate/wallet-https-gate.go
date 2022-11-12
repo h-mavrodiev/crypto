@@ -31,7 +31,7 @@ func (c *GateClient) GetWithdrawalRecords(queryParam string, queryString string,
 		return errors.New("failed to create get request for gate withdrawals")
 	}
 
-	err = c.SignReq(req, http.MethodGet, c.Endpoints.Wallet, resource, req.URL.RawQuery, "")
+	err = signHTTPSReq(c, req, http.MethodGet, c.Endpoints.Wallet, resource, req.URL.RawQuery, "")
 	if err != nil {
 		return errors.New("failed to sing the get request for gate withdrawals")
 	}
@@ -55,7 +55,7 @@ func (c *GateClient) GetTotalBalance(queryParam string, queryString string, ch c
 		return errors.New("failed to create get request for gate total balance")
 	}
 
-	err = c.SignReq(req, http.MethodGet, c.Endpoints.Wallet, resource, req.URL.RawQuery, "")
+	err = signHTTPSReq(c, req, http.MethodGet, c.Endpoints.Wallet, resource, req.URL.RawQuery, "")
 	if err != nil {
 		return errors.New("failed to sign get request for gate total balance")
 	}

@@ -16,8 +16,6 @@ type GateClient struct {
 	Prefix        string
 	Endpoints     configs.GateEndpoints
 	CommonHeaders configs.GateCommonHeaders
-	ApiKey        string
-	ApiSecret     string
 	HTTPClient    *http.Client
 }
 
@@ -136,4 +134,43 @@ type GateInfo struct {
 	SellsVolume float64
 	Buys        float64
 	BuysVolume  float64
+}
+
+type WSNotificationEvent struct {
+	Time    int         `json:"time"`
+	Channel string      `json:"channel"`
+	Event   string      `json:"event"`
+	Result  interface{} `json:"result"`
+}
+
+type WalletEventResult []struct {
+	Timestamp   string `json:"timestamp"`
+	TimestampMs string `json:"timestamp_ms"`
+	User        string `json:"user"`
+	Currency    string `json:"currency"`
+	Change      string `json:"change"`
+	Total       string `json:"total"`
+	Available   string `json:"available"`
+}
+
+type OrderBookEventResults struct {
+	T            int64      `json:"t"`
+	LastUpdateID int        `json:"lastUpdateId"`
+	S            string     `json:"s"`
+	Bids         [][]string `json:"bids"`
+	Asks         [][]string `json:"asks"`
+}
+
+type WSMsg struct {
+	Time    int64    `json:"time"`
+	Channel string   `json:"channel"`
+	Event   string   `json:"event"`
+	Payload []string `json:"payload"`
+	Auth    *Auth    `json:"auth"`
+}
+
+type Auth struct {
+	Method string `json:"method"`
+	KEY    string `json:"KEY"`
+	SIGN   string `json:"SIGN"`
 }

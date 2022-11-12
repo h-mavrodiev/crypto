@@ -69,7 +69,6 @@ func NewClient(
 	return &StexClient{
 		Host:      host,
 		Endpoints: endpoints,
-		ApiKey:    apiKey,
 		HTTPClient: &http.Client{
 			Timeout: time.Minute,
 		},

@@ -4,7 +4,6 @@ import (
 	"crypto/configs"
 	"crypto/internal/gate"
 	"crypto/internal/stex"
-	"fmt"
 )
 
 var (
@@ -13,12 +12,9 @@ var (
 
 // Loads configuration yml for clients and returns Clients struct
 func loadClients() Clients {
-	conf, err := configs.LoadConfig("config", "yml", "/Users/I576893/nonwork/configs")
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	c := Clients{}
-	c.InitClients(conf)
+	c.InitClients(configs.Conf)
 
 	return c
 }

@@ -70,8 +70,6 @@ func NewClient(
 		Prefix:        prefix,
 		Endpoints:     endpoints,
 		CommonHeaders: headers,
-		ApiKey:        apiKey,
-		ApiSecret:     apiSecret,
 		HTTPClient: &http.Client{
 			Timeout: time.Minute,
 		},

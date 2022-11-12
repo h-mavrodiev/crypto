@@ -17,7 +17,6 @@ type successResponse struct {
 // Client struct
 type StexClient struct {
 	Host          string
-	ApiKey        string
 	Endpoints     configs.StexEndpoints
 	CommonHeaders configs.StexCommonHeaders
 	HTTPClient    *http.Client
