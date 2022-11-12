@@ -9,8 +9,6 @@ import (
 
 var (
 	c Clients = loadClients()
-	// gatePriceInfo gate.GateInfo
-	// stexPriceInfo stex.StexInfo
 )
 
 // Loads configuration yml for clients and returns Clients struct

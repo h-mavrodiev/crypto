@@ -6,11 +6,6 @@ import (
 	"log"
 )
 
-type ArbitrageInfo struct {
-	Platforms string
-	Arbitrage float64
-}
-
 func CalculateArbitrage(sellsPrice float64, buysPrice float64) float64 {
 	// how much the buy price is bigger compared to the sell price?
 	// (a-b)*100 / a  to find percentage diff

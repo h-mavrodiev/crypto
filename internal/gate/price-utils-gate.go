@@ -4,13 +4,6 @@ import (
 	"strconv"
 )
 
-type GateInfo struct {
-	Sells       float64
-	SellsVolume float64
-	Buys        float64
-	BuysVolume  float64
-}
-
 func (g *GateInfo) CalcPriceAndVolume(o OrderBookDetails, minTrade float64) {
 	g.CalAskPricePerFixedAmount(o, minTrade)
 	g.CalBidPricePerFixedAmount(o, minTrade)

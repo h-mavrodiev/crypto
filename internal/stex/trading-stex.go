@@ -5,11 +5,6 @@ import (
 	"strconv"
 )
 
-type CurrencyPairFees struct {
-	SellFee string `json:"sell_fee"`
-	BuyFee  string `json:"buy_fee"`
-}
-
 func (c *StexClient) GetCurrencyPairFees(pair int, ch chan<- interface{}) error {
 	resource := "/fees" + "/" + strconv.Itoa(pair)
 

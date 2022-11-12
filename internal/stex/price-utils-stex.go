@@ -4,13 +4,6 @@ import (
 	"strconv"
 )
 
-type StexInfo struct {
-	Sells       float64
-	SellsVolume float64
-	Buys        float64
-	BuysVolume  float64
-}
-
 func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, minTrade float64) {
 	s.CalAskPricePerFixedAmount(o, minTrade)
 	s.CalBidPricePerFixedAmount(o, minTrade)

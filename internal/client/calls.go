@@ -9,11 +9,6 @@ import (
 	stex "crypto/internal/stex"
 )
 
-type Clients struct {
-	GateClient *gate.GateClient
-	StexClient *stex.StexClient
-}
-
 func (c *Clients) InitClients(conf configs.Config) {
 
 	c.GateClient = gate.NewClient(conf.Gate.Host,

@@ -27,11 +27,6 @@ func (c *GateClient) CreateGetRequest(endpoint string, resource string, queryPar
 	return req, nil
 }
 
-type errorResponse struct {
-	Label   string `json:"label"`
-	Message string `json:"message"`
-}
-
 func (c *GateClient) SendRequest(
 	req *http.Request,
 	target interface{}) error {
@@ -60,17 +55,6 @@ func (c *GateClient) SendRequest(
 	}
 
 	return nil
-}
-
-// Client struct
-type GateClient struct {
-	Host          string
-	Prefix        string
-	Endpoints     configs.GateEndpoints
-	CommonHeaders configs.GateCommonHeaders
-	ApiKey        string
-	ApiSecret     string
-	HTTPClient    *http.Client
 }
 
 func NewClient(

@@ -28,15 +28,6 @@ func (c *StexClient) CreateGetRequest(endpoint string, resource string, queryPar
 	return req, nil
 }
 
-type errorResponse struct {
-	Message string `json:"message"`
-}
-
-type successResponse struct {
-	Success bool        `json:"success"`
-	Data    interface{} `json:"data"`
-}
-
 func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -68,15 +59,6 @@ func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 	}
 
 	return nil
-}
-
-// Client struct
-type StexClient struct {
-	Host          string
-	ApiKey        string
-	Endpoints     configs.StexEndpoints
-	CommonHeaders configs.StexCommonHeaders
-	HTTPClient    *http.Client
 }
 
 func NewClient(
