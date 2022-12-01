@@ -2,7 +2,10 @@ package gate
 
 import (
 	"crypto/configs"
+	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 type errorResponse struct {
@@ -16,7 +19,9 @@ type GateClient struct {
 	Prefix        string
 	Endpoints     configs.GateEndpoints
 	CommonHeaders configs.GateCommonHeaders
+	Pair          string
 	HTTPClient    *http.Client
+	WSConn        *websocket.Conn
 }
 
 type CurrencyPairDetails struct {
@@ -33,12 +38,18 @@ type CurrencyPairDetails struct {
 	BuyStart        int    `json:"buy_start"`
 }
 
-type OrderBookDetails struct {
+type orderBook struct {
 	ID      int        `json:"id"`
 	Current int64      `json:"current"`
 	Update  int64      `json:"update"`
 	Asks    [][]string `json:"asks"`
 	Bids    [][]string `json:"bids"`
+}
+
+type Balance struct {
+	BTC  string `json:"btc"`
+	ETH  string `json:"eth"`
+	USDT string `json:"usdt"`
 }
 
 type CurrencyChain []struct {
@@ -70,6 +81,12 @@ type TotalBalance struct {
 type Total struct {
 	Currency string `json:"currency"`
 	Amount   string `json:"amount"`
+}
+
+type SpotBalance []struct {
+	Currency  string `json:"currency"`
+	Available string `json:"available"`
+	Locked    string `json:"locked"`
 }
 
 type Details struct {
@@ -129,21 +146,21 @@ type Cbbc struct {
 	Amount   string `json:"amount"`
 }
 
-type GateInfo struct {
+type Prices struct {
 	Sells       float64
 	SellsVolume float64
 	Buys        float64
 	BuysVolume  float64
 }
 
-type WSNotificationEvent struct {
-	Time    int         `json:"time"`
-	Channel string      `json:"channel"`
-	Event   string      `json:"event"`
-	Result  interface{} `json:"result"`
+type WSUpdateNotification struct {
+	Time    int             `json:"time"`
+	Channel string          `json:"channel"`
+	Event   string          `json:"event"`
+	Result  json.RawMessage `json:"result"`
 }
 
-type WalletEventResult []struct {
+type WalletUpdateNotification []struct {
 	Timestamp   string `json:"timestamp"`
 	TimestampMs string `json:"timestamp_ms"`
 	User        string `json:"user"`
@@ -153,9 +170,9 @@ type WalletEventResult []struct {
 	Available   string `json:"available"`
 }
 
-type OrderBookEventResults struct {
+type orderBookUpdateNotification struct {
 	T            int64      `json:"t"`
-	LastUpdateID int        `json:"lastUpdateId"`
+	LastUpdateID int64      `json:"lastUpdateId"`
 	S            string     `json:"s"`
 	Bids         [][]string `json:"bids"`
 	Asks         [][]string `json:"asks"`

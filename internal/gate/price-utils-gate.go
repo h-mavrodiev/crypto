@@ -2,14 +2,26 @@ package gate
 
 import (
 	"strconv"
+	"sync"
 )
 
-func (g *GateInfo) CalcPriceAndVolume(o OrderBookDetails, minTrade float64) {
-	g.CalAskPricePerFixedAmount(o, minTrade)
-	g.CalBidPricePerFixedAmount(o, minTrade)
+type SafePrices struct {
+	mu     sync.Mutex
+	Prices Prices
 }
 
-func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
+func (p *SafePrices) updatePrices(o *safeOrderBook) {
+	p.mu.Lock()
+	p.Prices.CalcPriceAndVolume(&o.orderBook)
+	p.mu.Unlock()
+}
+
+func (g *Prices) CalcPriceAndVolume(o *orderBook) {
+	g.CalAskPricePerFixedAmount(o)
+	g.CalBidPricePerFixedAmount(o)
+}
+
+func (g *Prices) CalAskPricePerFixedAmount(o *orderBook) {
 
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
@@ -49,7 +61,7 @@ func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float6
 
 }
 
-func (g *GateInfo) CalBidPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
+func (g *Prices) CalBidPricePerFixedAmount(o *orderBook) {
 
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 

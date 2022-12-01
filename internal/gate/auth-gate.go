@@ -67,7 +67,7 @@ func (msg *WSMsg) signWSMsg() {
 	signStr := sign(msg.Channel, msg.Event, msg.Time)
 	msg.Auth = &Auth{
 		Method: "api_key",
-		KEY:    configs.Conf.Gate.APISecret,
+		KEY:    configs.Conf.Gate.APIKey,
 		SIGN:   signStr,
 	}
 }

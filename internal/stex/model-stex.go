@@ -19,66 +19,15 @@ type StexClient struct {
 	Host          string
 	Endpoints     configs.StexEndpoints
 	CommonHeaders configs.StexCommonHeaders
+	Pair          int
 	HTTPClient    *http.Client
 }
 
-type StexInfo struct {
+type Prices struct {
 	Sells       float64
 	SellsVolume float64
 	Buys        float64
 	BuysVolume  float64
-}
-
-type InfoData struct {
-	Email                 string           `json:"email"`
-	Username              string           `json:"username"`
-	UserID                int              `json:"user_id"`
-	Verifications         Verifications    `json:"verifications"`
-	TradingFeeLevels      TradingFeeLevels `json:"trading_fee_levels"`
-	APIWithdrawalsAllowed bool             `json:"api_withdrawals_allowed"`
-	ReferralProgram       ReferalProgram   `json:"referral_program"`
-	ApproxBalance         ApproxBalance    `json:"approx_balance"`
-	Settings              Settings         `json:"settings"`
-}
-
-type Verifications struct {
-	Cryptonomica bool `json:"cryptonomica"`
-	Privatbank   bool `json:"privatbank"`
-	Stex         bool `json:"stex"`
-}
-
-type TradingFeeLevels struct {
-	NotVerified  string `json:"not_verified"`
-	Cryptonomica string `json:"cryptonomica"`
-	Privatbank   string `json:"privatbank"`
-	Stex         string `json:"stex"`
-}
-
-type ReferalProgram struct {
-	ReferralCode string `json:"referral_code"`
-	Members      int    `json:"members"`
-	Invited      bool   `json:"invited"`
-}
-
-type ApproxBalance struct {
-	Usd Usd `json:"USD"`
-	Btc Btc `json:"BTC"`
-}
-
-type Usd struct {
-	Balance       string `json:"balance"`
-	FrozenBalance string `json:"frozen_balance"`
-	BonusBalance  string `json:"bonus_balance"`
-	HoldBalance   string `json:"hold_balance"`
-	TotalBalance  string `json:"total_balance"`
-}
-
-type Btc struct {
-	Balance       string `json:"balance"`
-	FrozenBalance string `json:"frozen_balance"`
-	BonusBalance  string `json:"bonus_balance"`
-	HoldBalance   string `json:"hold_balance"`
-	TotalBalance  string `json:"total_balance"`
 }
 
 type Settings struct {
@@ -115,7 +64,7 @@ type CurrencyPairDetails []struct {
 	TradingPrecision  int    `json:"trading_precision"`
 }
 
-type OrderBookDetails struct {
+type orderBook struct {
 	Ask            Ask     `json:"ask"`
 	Bid            Bid     `json:"bid"`
 	AskTotalAmount float64 `json:"ask_total_amount"`

@@ -2,14 +2,25 @@ package stex
 
 import (
 	"strconv"
+	"sync"
 )
 
-func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, minTrade float64) {
-	s.CalAskPricePerFixedAmount(o, minTrade)
-	s.CalBidPricePerFixedAmount(o, minTrade)
+type SafePrices struct {
+	mu     sync.Mutex
+	Prices Prices
 }
 
-func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
+func (p *SafePrices) updatePrices(o *safeOrderBook) {
+	p.mu.Lock()
+	p.Prices.CalcPriceAndVolume(&o.orderBook)
+	p.mu.Unlock()
+}
+func (s *Prices) CalcPriceAndVolume(o *orderBook) {
+	s.CalAskPricePerFixedAmount(o)
+	s.CalBidPricePerFixedAmount(o)
+}
+
+func (s *Prices) CalAskPricePerFixedAmount(o *orderBook) {
 
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
@@ -49,7 +60,7 @@ func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float6
 
 }
 
-func (s *StexInfo) CalBidPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
+func (s *Prices) CalBidPricePerFixedAmount(o *orderBook) {
 
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 

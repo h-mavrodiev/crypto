@@ -2,18 +2,14 @@ package main
 
 import (
 	"crypto/configs"
-	// "crypto/internal/arbitrage"
+	"crypto/internal/arbitrage"
+	"crypto/internal/client"
 	"crypto/internal/gate"
-	// "crypto/internal/stex"
+	"crypto/internal/server"
+	"crypto/internal/stex"
 	"fmt"
 	"os"
 )
-
-// var (
-// 	gatePriceInfo         gate.GateInfo
-// 	stexPriceInfo         stex.StexInfo
-// 	ArbitrageResponseList []arbitrage.ArbitrageInfo
-// )
 
 func main() {
 
@@ -24,9 +20,10 @@ func main() {
 		fmt.Println(err)
 	}
 
-	// go arbitrage.ExecuteArbitrage(&gatePriceInfo, &stexPriceInfo, &ArbitrageResponseList)
-	// go client.StartPlaftormsClient(&gatePriceInfo, &stexPriceInfo)
-	// r := server.Server(&gatePriceInfo, &stexPriceInfo, &ArbitrageResponseList)
-	// r.Run(":8080")
-	gate.GateWSClient()
+	go client.StartPlaftormsClient(&gate.PriceInfo, &gate.BalanceInfo, &stex.PriceInfo, &stex.BalanceInfo)
+	go arbitrage.ExecuteArbitrage(&gate.PriceInfo, &stex.PriceInfo)
+	r := server.Server(&gate.PriceInfo,
+		&stex.PriceInfo,
+		&arbitrage.ArbitrageResponseList)
+	r.Run(":8080")
 }

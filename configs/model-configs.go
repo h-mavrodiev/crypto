@@ -7,6 +7,7 @@ type GateConfig struct {
 	APISecret     string            `yaml:"apiSecret"`
 	Endpoints     GateEndpoints     `yaml:"endpoints"`
 	CommonHeaders GateCommonHeaders `yaml:"commonHeaders"`
+	Pair          string            `yaml:"pair"`
 	WS            WS                `yaml:"ws"`
 }
 
@@ -26,6 +27,7 @@ type StexConfig struct {
 	APIKey        string            `yaml:"apiKey"`
 	Endpoints     StexEndpoints     `yaml:"endpoints"`
 	CommonHeaders StexCommonHeaders `yaml:"commonHeaders"`
+	Pair          int               `yaml:"pair"`
 }
 
 type StexEndpoints struct {
@@ -47,6 +49,6 @@ type Config struct {
 
 type WS struct {
 	Schema string `yaml:"schema"`
-	Host   string `yaml:"host"`
+	WSHost string `yaml:"wshost"`
 	Path   string `yaml:"path"`
 }

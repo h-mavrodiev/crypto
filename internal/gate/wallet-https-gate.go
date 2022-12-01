@@ -46,7 +46,7 @@ func (c *GateClient) GetWithdrawalRecords(queryParam string, queryString string,
 	return nil
 }
 
-func (c *GateClient) GetTotalBalance(queryParam string, queryString string, ch chan<- interface{}) error {
+func (c *GateClient) GetTotalBalance(queryParam string, queryString string, ch chan<- *TotalBalance) error {
 
 	resource := "/total_balance"
 
@@ -65,7 +65,7 @@ func (c *GateClient) GetTotalBalance(queryParam string, queryString string, ch c
 		return errors.New("failed to send get request for gate total balance")
 	}
 
-	ch <- res
+	ch <- &res
 
 	return nil
 }

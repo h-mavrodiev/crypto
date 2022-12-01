@@ -36,7 +36,7 @@ func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 
 	defer res.Body.Close()
 
-	log.Printf("| %s %s -> STEX request ... \n", res.Request.Method, res.Status)
+	log.Printf("|| %s || %s || -> STEX request ... \n", res.Request.Method, res.Status)
 
 	// Try to unmarshal into errorResponse
 	if res.StatusCode != http.StatusOK {
@@ -65,10 +65,13 @@ func NewClient(
 	host string,
 	apiKey string,
 	endpoints configs.StexEndpoints,
-	headers configs.StexCommonHeaders) *StexClient {
+	headers configs.StexCommonHeaders,
+	pair int) *StexClient {
 	return &StexClient{
-		Host:      host,
-		Endpoints: endpoints,
+		Host:          host,
+		Endpoints:     endpoints,
+		CommonHeaders: headers,
+		Pair:          pair,
 		HTTPClient: &http.Client{
 			Timeout: time.Minute,
 		},

@@ -1,24 +1,26 @@
 package stex
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
-func (c *StexClient) GetProfileInfo(ch chan<- interface{}) error {
+func (c *StexClient) GetProfileWalletBalanceDetails(b *SafeBalance) error {
 
-	resource := "info"
+	resource := "wallets"
 
 	req, err := c.CreateGetRequest(c.Endpoints.Profile, resource, "", "")
 	if err != nil {
-		return errors.New("faild create get request for stex profile info")
+		return errors.New("failed create get request for stex profile wallet balance")
 	}
 
 	authenticate(c, req)
 
-	res := InfoData{}
+	res := ProfileBalance{}
 	if err = c.SendRequest(req, &res); err != nil {
-		return errors.New("failed get request for stex profile info")
+		return fmt.Errorf("\nfailed to send get request for stex profile wallet balance -> \n %s", err.Error())
 	}
-
-	ch <- res
+	b.updateBalanceFromHTTP(&res)
 
 	return nil
 }
