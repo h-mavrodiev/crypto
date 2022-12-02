@@ -8,6 +8,7 @@ type GateConfig struct {
 	Endpoints     GateEndpoints     `yaml:"endpoints"`
 	CommonHeaders GateCommonHeaders `yaml:"commonHeaders"`
 	Pair          string            `yaml:"pair"`
+	MinTrade      float64           `yaml:"minTrade"`
 	WS            WS                `yaml:"ws"`
 }
 
@@ -28,6 +29,7 @@ type StexConfig struct {
 	Endpoints     StexEndpoints     `yaml:"endpoints"`
 	CommonHeaders StexCommonHeaders `yaml:"commonHeaders"`
 	Pair          int               `yaml:"pair"`
+	MinTrade      float64           `yaml:"minTrade"`
 }
 
 type StexEndpoints struct {

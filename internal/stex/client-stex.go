@@ -36,7 +36,7 @@ func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 
 	defer res.Body.Close()
 
-	log.Printf("|| %s || %s || -> STEX request ... \n", res.Request.Method, res.Status)
+	log.Printf("|| %s || %s || -> STEX request -> %s ... \n", res.Request.Method, res.Status, req.URL.Path)
 
 	// Try to unmarshal into errorResponse
 	if res.StatusCode != http.StatusOK {

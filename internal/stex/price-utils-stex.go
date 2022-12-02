@@ -1,6 +1,7 @@
 package stex
 
 import (
+	"crypto/configs"
 	"strconv"
 	"sync"
 )
@@ -21,7 +22,6 @@ func (s *Prices) CalcPriceAndVolume(o *orderBook) {
 }
 
 func (s *Prices) CalAskPricePerFixedAmount(o *orderBook) {
-
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Ask {
@@ -38,9 +38,9 @@ func (s *Prices) CalAskPricePerFixedAmount(o *orderBook) {
 		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			minTradeVolume = minTrade * usdPrice
+			minTradeVolume = configs.Conf.Stex.MinTrade * usdPrice
 		} else {
-			minTradeVolume = minTrade * wUSDPrice
+			minTradeVolume = configs.Conf.Stex.MinTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price
@@ -61,7 +61,6 @@ func (s *Prices) CalAskPricePerFixedAmount(o *orderBook) {
 }
 
 func (s *Prices) CalBidPricePerFixedAmount(o *orderBook) {
-
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Bid {
@@ -79,9 +78,9 @@ func (s *Prices) CalBidPricePerFixedAmount(o *orderBook) {
 		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			minTradeVolume = minTrade * usdPrice
+			minTradeVolume = configs.Conf.Stex.MinTrade * usdPrice
 		} else {
-			minTradeVolume = minTrade * wUSDPrice
+			minTradeVolume = configs.Conf.Stex.MinTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price

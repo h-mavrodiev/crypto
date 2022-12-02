@@ -13,15 +13,9 @@ import (
 	"time"
 )
 
-var (
-	APISecret string = configs.Conf.Gate.APISecret
-	APIKey    string = configs.Conf.Gate.APIKey
-)
-
 // SignReq provides gateAPIv4 authentication headers to a request
 // To check for how to add basic/AccessToken authentication visit the gate Go SDK and search for sign in the client.go file
-func signHTTPSReq(
-	c *GateClient,
+func (c *GateClient) signHTTPSReq(
 	req *http.Request,
 	method string,
 	endpoint string,
@@ -29,7 +23,12 @@ func signHTTPSReq(
 	queryString string,
 	payloadString string) error {
 
-	authURL := c.Host + c.Prefix + endpoint + apiRes
+	var (
+		secret  string = configs.Conf.Gate.APISecret
+		key     string = configs.Conf.Gate.APIKey
+		authURL string = c.Host + c.Prefix + endpoint + apiRes
+	)
+
 	requestUrl, err := url.Parse(authURL)
 	if err != nil {
 		return err
@@ -44,12 +43,12 @@ func signHTTPSReq(
 
 	m := fmt.Sprintf("%s\n%s\n%s\n%s\n%s", method, requestUrl.Path, queryString, hashedPayload, t)
 
-	mac := hmac.New(sha512.New, []byte(APISecret))
+	mac := hmac.New(sha512.New, []byte(secret))
 
 	mac.Write([]byte(m))
 	sign := hex.EncodeToString(mac.Sum(nil))
 
-	req.Header.Add("KEY", APIKey)
+	req.Header.Add("KEY", key)
 	req.Header.Add("Timestamp", t)
 	req.Header.Add("SIGN", sign)
 
@@ -67,7 +66,7 @@ func (msg *WSMsg) signWSMsg() {
 	signStr := sign(msg.Channel, msg.Event, msg.Time)
 	msg.Auth = &Auth{
 		Method: "api_key",
-		KEY:    configs.Conf.Gate.APIKey,
+		KEY:    configs.Conf.Gate.APISecret,
 		SIGN:   signStr,
 	}
 }

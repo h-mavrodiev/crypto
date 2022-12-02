@@ -39,7 +39,7 @@ func (c *GateClient) SendRequest(
 
 	defer res.Body.Close()
 
-	log.Printf("|| %s || %s || -> GATE request ... \n", res.Request.Method, res.Status)
+	log.Printf("|| %s || %s || -> GATE request -> %s ... \n", res.Request.Method, res.Status, req.URL.Path)
 
 	// Try to unmarshal into errorResponse
 	if res.StatusCode != http.StatusOK {

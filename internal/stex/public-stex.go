@@ -8,8 +8,7 @@ import (
 )
 
 const (
-	httpOBDelayTime     string = "1.5s"
-	httpWalletDelaytime string = "1m"
+	httpOBDelayTime string = "1.5s"
 )
 
 func (c *StexClient) GetCurrencyPairDetails(pair int, ch chan<- interface{}) error {

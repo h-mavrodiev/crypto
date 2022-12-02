@@ -22,8 +22,6 @@ func main() {
 
 	go client.StartPlaftormsClient(&gate.PriceInfo, &gate.BalanceInfo, &stex.PriceInfo, &stex.BalanceInfo)
 	go arbitrage.ExecuteArbitrage(&gate.PriceInfo, &stex.PriceInfo)
-	r := server.Server(&gate.PriceInfo,
-		&stex.PriceInfo,
-		&arbitrage.ArbitrageResponseList)
+	r := server.Server()
 	r.Run(":8080")
 }

@@ -9,24 +9,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Server(gatePriceInfo *gate.SafePrices, stexPriceInfo *stex.SafePrices, arbList *[]arbitrage.ArbitrageInfo) *gin.Engine {
+func Server() *gin.Engine {
 	router := gin.Default()
 
 	// Query string parameters are parsed using the existing underlying request object.
 	// The request responds to a url matching:  /welcome?firstname=Jane&lastname=Doe
 	router.GET("/gate", func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(http.StatusOK, &gatePriceInfo.Prices)
+		c.JSON(http.StatusOK, &gate.PriceInfo.Prices)
 	})
 
 	router.GET("/stex", func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(http.StatusOK, &stexPriceInfo.Prices)
+		c.JSON(http.StatusOK, &stex.PriceInfo.Prices)
 	})
 
 	router.GET("/arbitrage", func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(http.StatusOK, &arbList)
+		c.JSON(http.StatusOK, &arbitrage.ArbitrageResponseList)
 	})
 
 	return router

@@ -1,6 +1,7 @@
 package gate
 
 import (
+	"crypto/configs"
 	"strconv"
 	"sync"
 )
@@ -22,7 +23,6 @@ func (g *Prices) CalcPriceAndVolume(o *orderBook) {
 }
 
 func (g *Prices) CalAskPricePerFixedAmount(o *orderBook) {
-
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Asks {
@@ -39,9 +39,9 @@ func (g *Prices) CalAskPricePerFixedAmount(o *orderBook) {
 		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			minTradeVolume = minTrade * usdPrice
+			minTradeVolume = configs.Conf.Gate.MinTrade * usdPrice
 		} else {
-			minTradeVolume = minTrade * wUSDPrice
+			minTradeVolume = configs.Conf.Gate.MinTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price
@@ -62,7 +62,6 @@ func (g *Prices) CalAskPricePerFixedAmount(o *orderBook) {
 }
 
 func (g *Prices) CalBidPricePerFixedAmount(o *orderBook) {
-
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Bids {
@@ -80,9 +79,9 @@ func (g *Prices) CalBidPricePerFixedAmount(o *orderBook) {
 		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			minTradeVolume = minTrade * usdPrice
+			minTradeVolume = configs.Conf.Gate.MinTrade * usdPrice
 		} else {
-			minTradeVolume = minTrade * wUSDPrice
+			minTradeVolume = configs.Conf.Gate.MinTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price

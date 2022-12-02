@@ -4,8 +4,6 @@ import (
 	"crypto/configs"
 	"crypto/internal/gate"
 	"crypto/internal/stex"
-	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 )
@@ -47,16 +45,12 @@ func StartPlaftormsClient(gatePriceInfo *gate.SafePrices, gateBalance *gate.Safe
 
 	for {
 		err := <-errs
-		// TODO: close channels on HTTP error
 		log.Println(err)
-
-		t, _ := time.ParseDuration("4s")
-		time.Sleep(t)
-		print, _ := json.Marshal(stexBalance)
-		fmt.Println(string(print))
 	}
 }
 
+// t, _ := time.ParseDuration("4s")
+// time.Sleep(t)
 // fmt.Println("GATE")
 // print, _ := json.Marshal(gatePriceInfo)
 // fmt.Println(string(print))

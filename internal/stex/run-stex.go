@@ -1,8 +1,9 @@
 package stex
 
+import "log"
+
 const (
-	numRetry int     = 5
-	minTrade float64 = 1
+	numRetry int = 5
 )
 
 var (
@@ -11,7 +12,18 @@ var (
 )
 
 func (c *StexClient) RunStex(prices *SafePrices, balance *SafeBalance, errs chan error) {
-	var ob safeOrderBook = safeOrderBook{orderBook: orderBook{}}
+	var (
+		ob  safeOrderBook = safeOrderBook{orderBook: orderBook{}}
+		err error
+	)
+
+	// Initial call to obtain balance
+	err = c.GetProfileWalletBalanceDetails(balance)
+	if err != nil {
+		log.Println(err)
+		errs <- err
+	}
 
 	go c.CallStexGetOrderBookDetails(&ob, prices, errs)
+	go c.CallStexGetProfileWalletBalanceDetails(balance, errs)
 }

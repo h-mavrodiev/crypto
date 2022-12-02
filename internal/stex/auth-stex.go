@@ -6,5 +6,7 @@ import (
 )
 
 func authenticate(c *StexClient, req *http.Request) {
-	req.Header.Add("Authorization", "Bearer"+" "+configs.Conf.Stex.APIKey)
+	var key string = configs.Conf.Stex.APIKey
+
+	req.Header.Add("Authorization", "Bearer"+" "+key)
 }

@@ -6,12 +6,7 @@ type Balance struct {
 	USDT string `json:"usdt"`
 }
 
-type ProfileBalance struct {
-	Success bool `json:"success"`
-	Data    data `json:"data"`
-}
-
-type data []struct {
+type balanceData []struct {
 	ID                            int                      `json:"id"`
 	CurrencyID                    int                      `json:"currency_id"`
 	CurrencyCode                  string                   `json:"currency_code"`
@@ -46,7 +41,7 @@ type depositAddress struct {
 	SupportsNewAddressCreation     bool   `json:"supports_new_address_creation"`
 }
 
-type multiDepositAddresses struct {
+type multiDepositAddresses []struct {
 	Address                        string `json:"address"`
 	AddressName                    string `json:"address_name"`
 	AdditionalAddressParameter     string `json:"additional_address_parameter"`
@@ -63,7 +58,7 @@ type protocolSpecificSettings []struct {
 	Active                        bool    `json:"active"`
 	DisableDeposits               bool    `json:"disable_deposits"`
 	DisableWithdrawals            bool    `json:"disable_withdrawals"`
-	WithdrawalLimit               int     `json:"withdrawal_limit"`
+	WithdrawalLimit               float64 `json:"withdrawal_limit"`
 	DepositFeeCurrencyID          int     `json:"deposit_fee_currency_id"`
 	DepositFeeCurrencyCode        string  `json:"deposit_fee_currency_code"`
 	DepositFeePercent             int     `json:"deposit_fee_percent"`
@@ -89,5 +84,5 @@ type coinInfo struct {
 }
 
 type rates struct {
-	Btc float64 `json:"BTC"`
+	Btc string `json:"BTC"`
 }

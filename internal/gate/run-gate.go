@@ -14,8 +14,7 @@ import (
 )
 
 const (
-	numRetry int     = 5
-	minTrade float64 = 1
+	numRetry int = 5
 )
 
 var (
@@ -180,13 +179,14 @@ func (c *GateClient) readMessages(ch chan<- *WSUpdateNotification, errs chan<- e
 func (c *GateClient) RunGate(prices *SafePrices, balance *SafeBalance, errs chan error) {
 	msgCh := make(chan *WSUpdateNotification)
 	quitWs := make(chan bool)
-	var ob safeOrderBook = safeOrderBook{orderBook: orderBook{}}
-
-	var err error
+	var (
+		ob  safeOrderBook = safeOrderBook{orderBook: orderBook{}}
+		err error
+	)
 
 	c.WSConn.SetPingHandler(nil)
 
-	// Innital call to obtain balance
+	// Initial call to obtain balance
 	err = c.GetSpotWalletBalanceDetails(balance)
 	if err != nil {
 		log.Println(err)

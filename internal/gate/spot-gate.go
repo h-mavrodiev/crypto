@@ -77,7 +77,7 @@ func (c *GateClient) GetSpotWalletBalanceDetails(b *SafeBalance) error {
 		return errors.New("failed to create get request for gate spot balance")
 	}
 
-	err = signHTTPSReq(c, req, http.MethodGet, c.Endpoints.Wallet, resource, req.URL.RawQuery, "")
+	err = c.signHTTPSReq(req, http.MethodGet, c.Endpoints.Spot, resource, req.URL.RawQuery, "")
 	if err != nil {
 		return errors.New("failed to sing the get request for gate spot balance")
 	}
