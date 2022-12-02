@@ -30,7 +30,7 @@ const columns = [{
 // Use effect - effect hook
 function ArbitrageInfo(){
     async function loadArbitrageInfo() {
-      await sleep(1000)
+      await sleep(2000)
       fetch("http://localhost:8080/arbitrage")
       .then((response) => response.json())
       .then((data) => setArbitrageInfo(data));
@@ -47,7 +47,7 @@ function ArbitrageInfo(){
             striped 
             caption={<ArbitrageCaptionElement/>}
             columns={ columns }
-            rowStyle= {{border: '2px solid #e06c75'}}/>
+            rowStyle= {{border: '2px solid #e06c75' }}/>
 }
 
 export default ArbitrageInfo;
