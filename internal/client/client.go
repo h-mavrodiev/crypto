@@ -4,47 +4,53 @@ import (
 	"crypto/configs"
 	"crypto/internal/gate"
 	"crypto/internal/stex"
-	"fmt"
+	"log"
+	"time"
 )
 
 var (
-	c Clients = loadClients()
-	// gatePriceInfo gate.GateInfo
-	// stexPriceInfo stex.StexInfo
+	c    Clients
+	errs chan error = make(chan error)
 )
 
-// Loads configuration yml for clients and returns Clients struct
-func loadClients() Clients {
-	conf, err := configs.LoadConfig("config", "yml", "/Users/I576893/nonwork/configs")
-	if err != nil {
-		fmt.Println(err)
-	}
-	c := Clients{}
-	c.InitClients(conf)
+func (c *Clients) InitHTTPClients() {
+	var err error
 
-	return c
+	c.GateClient, err = gate.NewClient(configs.Conf.Gate.Host,
+		configs.Conf.Gate.Prefix,
+		configs.Conf.Gate.Endpoints,
+		configs.Conf.Gate.CommonHeaders,
+		configs.Conf.Gate.Pair,
+		configs.Conf.Gate.APIKey,
+		configs.Conf.Gate.APISecret)
+	if err != nil {
+		log.Printf("Could not initiate Gate Client: %s", err)
+	}
+
+	c.StexClient = stex.NewClient(configs.Conf.Stex.Host,
+		configs.Conf.Stex.APIKey,
+		configs.Conf.Stex.Endpoints,
+		configs.Conf.Stex.CommonHeaders,
+		configs.Conf.Stex.Pair)
+
 }
 
-func StartPlaftormsClient(gatePriceInfo *gate.GateInfo, stexPriceInfo *stex.StexInfo) {
-	// Those channels were never closed... find out if you should actually close them ...
-	gateOrders := make(chan gate.OrderBookDetails)
-	stexOrders := make(chan stex.OrderBookDetails)
+func StartPlaftormsClient(gatePriceInfo *gate.SafePrices, gateBalance *gate.SafeBalance, stexPriceInfo *stex.SafePrices, stexBalance *stex.SafeBalance) {
+	c.InitHTTPClients()
+	go c.GateClient.RunGate(gatePriceInfo, gateBalance, errs)
+	go c.StexClient.RunStex(stexPriceInfo, stexBalance, errs)
 
-	go c.CallStexGetOrderBookDetails(stexOrders, "1.5s", 407)
-	go c.CallGateGetOrderBookDetails(gateOrders, "1s", "ETH_USDT")
+	// just to give chance for the clients to spin up
+	time.Sleep(2 * time.Second)
 
 	for {
-		select {
-		case gateOrder := <-gateOrders:
-			gatePriceInfo.CalcPriceAndVolume(gateOrder, 1)
-			// fmt.Println("GATE")
-			// print, _ := json.Marshal(gatePriceInfo)
-			// fmt.Println(string(print))
-		case stexOrder := <-stexOrders:
-			stexPriceInfo.CalcPriceAndVolume(stexOrder, 1)
-			// fmt.Println("STEX")
-			// print, _ := json.Marshal(stexPriceInfo)
-			// fmt.Println(string(print))
-		}
+		err := <-errs
+		log.Println(err)
 	}
 }
+
+// t, _ := time.ParseDuration("4s")
+// time.Sleep(t)
+// fmt.Println("GATE")
+// print, _ := json.Marshal(gatePriceInfo)
+// fmt.Println(string(print))

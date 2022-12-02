@@ -1,23 +1,27 @@
 package stex
 
 import (
+	"crypto/configs"
 	"strconv"
+	"sync"
 )
 
-type StexInfo struct {
-	Sells       float64
-	SellsVolume float64
-	Buys        float64
-	BuysVolume  float64
+type SafePrices struct {
+	mu     sync.Mutex
+	Prices Prices
 }
 
-func (s *StexInfo) CalcPriceAndVolume(o OrderBookDetails, minTrade float64) {
-	s.CalAskPricePerFixedAmount(o, minTrade)
-	s.CalBidPricePerFixedAmount(o, minTrade)
+func (p *SafePrices) updatePrices(o *safeOrderBook) {
+	p.mu.Lock()
+	p.Prices.CalcPriceAndVolume(&o.orderBook)
+	p.mu.Unlock()
+}
+func (s *Prices) CalcPriceAndVolume(o *orderBook) {
+	s.CalAskPricePerFixedAmount(o)
+	s.CalBidPricePerFixedAmount(o)
 }
 
-func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
-
+func (s *Prices) CalAskPricePerFixedAmount(o *orderBook) {
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Ask {
@@ -34,9 +38,9 @@ func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float6
 		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			minTradeVolume = minTrade * usdPrice
+			minTradeVolume = configs.Conf.Stex.MinTrade * usdPrice
 		} else {
-			minTradeVolume = minTrade * wUSDPrice
+			minTradeVolume = configs.Conf.Stex.MinTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price
@@ -56,8 +60,7 @@ func (s *StexInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float6
 
 }
 
-func (s *StexInfo) CalBidPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
-
+func (s *Prices) CalBidPricePerFixedAmount(o *orderBook) {
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Bid {
@@ -75,9 +78,9 @@ func (s *StexInfo) CalBidPricePerFixedAmount(o OrderBookDetails, minTrade float6
 		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			minTradeVolume = minTrade * usdPrice
+			minTradeVolume = configs.Conf.Stex.MinTrade * usdPrice
 		} else {
-			minTradeVolume = minTrade * wUSDPrice
+			minTradeVolume = configs.Conf.Stex.MinTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price

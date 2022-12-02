@@ -3,13 +3,21 @@ package arbitrage
 import (
 	"crypto/internal/gate"
 	"crypto/internal/stex"
-	"log"
 )
 
-type ArbitrageInfo struct {
-	Platforms string
-	Arbitrage float64
-}
+var (
+	gateToStex            float64
+	stexToGate            float64
+	ArbitrageResponseList []ArbitrageInfo = []ArbitrageInfo{
+		{
+			Platforms: "Gate to Stex",
+			Arbitrage: gateToStex,
+		},
+		{
+			Platforms: "Stex to Gate",
+			Arbitrage: stexToGate,
+		}}
+)
 
 func CalculateArbitrage(sellsPrice float64, buysPrice float64) float64 {
 	// how much the buy price is bigger compared to the sell price?
@@ -20,27 +28,31 @@ func CalculateArbitrage(sellsPrice float64, buysPrice float64) float64 {
 
 }
 
-func ExecuteArbitrage(gatePriceInfo *gate.GateInfo,
-	stexPriceInfo *stex.StexInfo,
-	ArbitrageResponseList *[]ArbitrageInfo,
-	GateToStex *float64,
-	StexToGate *float64) {
+func ExecuteArbitrage(gatePriceInfo *gate.SafePrices,
+	stexPriceInfo *stex.SafePrices) {
 
 	for {
+		gateToStex = CalculateArbitrage(gatePriceInfo.Prices.Sells, stexPriceInfo.Prices.Buys)
+		stexToGate = CalculateArbitrage(stexPriceInfo.Prices.Sells, gatePriceInfo.Prices.Buys)
 
-		*GateToStex = CalculateArbitrage(gatePriceInfo.Sells, stexPriceInfo.Buys)
-		*StexToGate = CalculateArbitrage(stexPriceInfo.Sells, gatePriceInfo.Buys)
-		*ArbitrageResponseList = []ArbitrageInfo{{Platforms: "Gate to Stex", Arbitrage: *GateToStex},
-			{Platforms: "Stex to Gate", Arbitrage: *StexToGate}}
+		ArbitrageResponseList = []ArbitrageInfo{
+			{
+				Platforms: "Gate to Stex",
+				Arbitrage: gateToStex,
+			},
+			{
+				Platforms: "Stex to Gate",
+				Arbitrage: stexToGate,
+			}}
 
 		// print, _ := json.Marshal(*ArbitrageResponseList)
 		// fmt.Println(string(print))
 
 		switch {
-		case *GateToStex > 1:
-			log.Printf("$$$$$$$$$$$$$$$$$$$ GATE ---> STEX ARBITRAGE %f $$$$$$$$$$$$$$$$$$$\n", *GateToStex)
-		case *StexToGate > 1:
-			log.Printf("$$$$$$$$$$$$$$$$$$$ STEX ---> GATE ARBITRAGE %f $$$$$$$$$$$$$$$$$$$\n", *StexToGate)
+		case gateToStex > 1:
+			//log.Printf("$$$$$$$$$$$$$$$$$$$ GATE ---> STEX ARBITRAGE %f $$$$$$$$$$$$$$$$$$$\n", gateToStex)
+		case stexToGate > 1:
+			//log.Printf("$$$$$$$$$$$$$$$$$$$ STEX ---> GATE ARBITRAGE %f $$$$$$$$$$$$$$$$$$$\n", stexToGate)
 		}
 	}
 }

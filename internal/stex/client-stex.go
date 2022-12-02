@@ -28,15 +28,6 @@ func (c *StexClient) CreateGetRequest(endpoint string, resource string, queryPar
 	return req, nil
 }
 
-type errorResponse struct {
-	Message string `json:"message"`
-}
-
-type successResponse struct {
-	Success bool        `json:"success"`
-	Data    interface{} `json:"data"`
-}
-
 func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -45,7 +36,7 @@ func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 
 	defer res.Body.Close()
 
-	log.Printf("| %s %s -> STEX request ... \n", res.Request.Method, res.Status)
+	log.Printf("|| %s || %s || -> STEX request -> %s ... \n", res.Request.Method, res.Status, req.URL.Path)
 
 	// Try to unmarshal into errorResponse
 	if res.StatusCode != http.StatusOK {
@@ -70,24 +61,17 @@ func (c *StexClient) SendRequest(req *http.Request, v interface{}) error {
 	return nil
 }
 
-// Client struct
-type StexClient struct {
-	Host          string
-	ApiKey        string
-	Endpoints     configs.StexEndpoints
-	CommonHeaders configs.StexCommonHeaders
-	HTTPClient    *http.Client
-}
-
 func NewClient(
 	host string,
 	apiKey string,
 	endpoints configs.StexEndpoints,
-	headers configs.StexCommonHeaders) *StexClient {
+	headers configs.StexCommonHeaders,
+	pair int) *StexClient {
 	return &StexClient{
-		Host:      host,
-		Endpoints: endpoints,
-		ApiKey:    apiKey,
+		Host:          host,
+		Endpoints:     endpoints,
+		CommonHeaders: headers,
+		Pair:          pair,
 		HTTPClient: &http.Client{
 			Timeout: time.Minute,
 		},

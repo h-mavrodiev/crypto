@@ -1,23 +1,28 @@
 package gate
 
 import (
+	"crypto/configs"
 	"strconv"
+	"sync"
 )
 
-type GateInfo struct {
-	Sells       float64
-	SellsVolume float64
-	Buys        float64
-	BuysVolume  float64
+type SafePrices struct {
+	mu     sync.Mutex
+	Prices Prices
 }
 
-func (g *GateInfo) CalcPriceAndVolume(o OrderBookDetails, minTrade float64) {
-	g.CalAskPricePerFixedAmount(o, minTrade)
-	g.CalBidPricePerFixedAmount(o, minTrade)
+func (p *SafePrices) updatePrices(o *safeOrderBook) {
+	p.mu.Lock()
+	p.Prices.CalcPriceAndVolume(&o.orderBook)
+	p.mu.Unlock()
 }
 
-func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
+func (g *Prices) CalcPriceAndVolume(o *orderBook) {
+	g.CalAskPricePerFixedAmount(o)
+	g.CalBidPricePerFixedAmount(o)
+}
 
+func (g *Prices) CalAskPricePerFixedAmount(o *orderBook) {
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Asks {
@@ -34,9 +39,9 @@ func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float6
 		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			minTradeVolume = minTrade * usdPrice
+			minTradeVolume = configs.Conf.Gate.MinTrade * usdPrice
 		} else {
-			minTradeVolume = minTrade * wUSDPrice
+			minTradeVolume = configs.Conf.Gate.MinTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price
@@ -56,8 +61,7 @@ func (g *GateInfo) CalAskPricePerFixedAmount(o OrderBookDetails, minTrade float6
 
 }
 
-func (g *GateInfo) CalBidPricePerFixedAmount(o OrderBookDetails, minTrade float64) {
-
+func (g *Prices) CalBidPricePerFixedAmount(o *orderBook) {
 	var minTradeVolume, wPrice, wUSDPriceSum, wUSDPrice, wPriceSum, sumVolume float64
 
 	for _, order := range o.Bids {
@@ -75,9 +79,9 @@ func (g *GateInfo) CalBidPricePerFixedAmount(o OrderBookDetails, minTrade float6
 		// USD/ETH * USD
 		usdPrice := 1 / price
 		if wUSDPrice == 0 {
-			minTradeVolume = minTrade * usdPrice
+			minTradeVolume = configs.Conf.Gate.MinTrade * usdPrice
 		} else {
-			minTradeVolume = minTrade * wUSDPrice
+			minTradeVolume = configs.Conf.Gate.MinTrade * wUSDPrice
 		}
 
 		// In this case the amount is the weight for the price

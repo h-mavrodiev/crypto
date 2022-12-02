@@ -2,6 +2,7 @@
   text-align: center;
   display: flex;
   flex-direction: row;
+  overflow-wrap: break-word;
   background-color: #282c34;
   min-height: 100vh;
   padding: 20px;
@@ -17,7 +18,7 @@
 
 }
 
-.Wallet-caption-element {
+.Balance-Info-element {
   text-align: center;
   color: #E06C75;
 }
@@ -38,13 +39,7 @@
   margin: 10px;
 }
 
-.Gate-caption-element {
+.Prices-caption-element {
   text-align: center;
   color: #C678DD;
-}
-
-
-.Stex-caption-element {
-  text-align: center;
-  color: #98C379;
 }

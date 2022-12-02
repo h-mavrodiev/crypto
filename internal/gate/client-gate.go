@@ -7,13 +7,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 // CreateGetReqeust creates GET http request
 func (c *GateClient) CreateGetRequest(endpoint string, resource string, queryParam string, queryString string) (*http.Request, error) {
 	urlStr := (c.Host + c.Prefix + endpoint + resource)
-
 	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
 	if err != nil {
 		return nil, err
@@ -27,11 +29,6 @@ func (c *GateClient) CreateGetRequest(endpoint string, resource string, queryPar
 	return req, nil
 }
 
-type errorResponse struct {
-	Label   string `json:"label"`
-	Message string `json:"message"`
-}
-
 func (c *GateClient) SendRequest(
 	req *http.Request,
 	target interface{}) error {
@@ -42,7 +39,7 @@ func (c *GateClient) SendRequest(
 
 	defer res.Body.Close()
 
-	log.Printf("| %s %s -> GATE request ... \n", res.Request.Method, res.Status)
+	log.Printf("|| %s || %s || -> GATE request -> %s ... \n", res.Request.Method, res.Status, req.URL.Path)
 
 	// Try to unmarshal into errorResponse
 	if res.StatusCode != http.StatusOK {
@@ -62,35 +59,56 @@ func (c *GateClient) SendRequest(
 	return nil
 }
 
-// Client struct
-type GateClient struct {
-	Host          string
-	Prefix        string
-	Endpoints     configs.GateEndpoints
-	CommonHeaders configs.GateCommonHeaders
-	ApiKey        string
-	ApiSecret     string
-	HTTPClient    *http.Client
-}
-
 func NewClient(
 	host string,
 	prefix string,
 	endpoints configs.GateEndpoints,
 	headers configs.GateCommonHeaders,
+	pair string,
 	apiKey string,
-	apiSecret string) *GateClient {
+	apiSecret string) (*GateClient, error) {
+
+	stop := false
+	retry := 0
+	var conn *websocket.Conn
+	var maxRetry int = 10
+
+	for !stop {
+		dialer := websocket.DefaultDialer
+		u := url.URL{Scheme: configs.Conf.Gate.WS.Schema,
+			Host: configs.Conf.Gate.WS.WSHost,
+			Path: configs.Conf.Gate.WS.Path}
+		c, _, err := dialer.Dial(u.String(), nil)
+		if err != nil {
+			if retry >= maxRetry {
+				log.Printf("max reconnect time %d reached, give it up", maxRetry)
+				return nil, err
+			}
+			retry++
+			log.Printf("failed to connect to server for the %d time, try again later", retry)
+			time.Sleep(time.Millisecond * (time.Duration(retry) * 500))
+			continue
+		} else {
+			stop = true
+			conn = c
+		}
+	}
+
+	if retry > 0 {
+		log.Printf("reconnect succeeded after retrying %d times", retry)
+	}
 
 	client := &GateClient{
 		Host:          host,
 		Prefix:        prefix,
 		Endpoints:     endpoints,
 		CommonHeaders: headers,
-		ApiKey:        apiKey,
-		ApiSecret:     apiSecret,
+		Pair:          pair,
 		HTTPClient: &http.Client{
 			Timeout: time.Minute,
 		},
+
+		WSConn: conn,
 	}
-	return client
+	return client, nil
 }
