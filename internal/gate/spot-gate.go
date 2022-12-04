@@ -33,7 +33,7 @@ func (c *GateClient) GetCurrencyPairDetails(pair string, ch chan<- interface{}, 
 	return nil
 }
 
-func (c *GateClient) GetOrderBookDetails(o *safeOrderBook, p *SafePrices) error {
+func (c *GateClient) GetOrderBookDetails(o *safeOrderBook, p *SafePrices, errs chan error) error {
 
 	resource := "/order_book"
 
@@ -48,7 +48,7 @@ func (c *GateClient) GetOrderBookDetails(o *safeOrderBook, p *SafePrices) error 
 	}
 
 	o.updateOrderBookFromHTTP(&res)
-	p.updatePrices(o)
+	p.updatePrices(o, errs)
 	return nil
 }
 
@@ -57,7 +57,7 @@ func (c *GateClient) CallGetOrderBookDetails(o *safeOrderBook, p *SafePrices, er
 	for {
 		h, _ := time.ParseDuration(httpOBDelayTime)
 		time.Sleep(h)
-		err := c.GetOrderBookDetails(o, p)
+		err := c.GetOrderBookDetails(o, p, errs)
 		if err != nil {
 			counter++
 			errs <- fmt.Errorf("HTTP Call Gate OB details fail: %v", err)

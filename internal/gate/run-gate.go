@@ -106,7 +106,13 @@ func (c *GateClient) reconnect(maxRetryConn int) error {
 	return nil
 }
 
-func listenWSChan(msgCh <-chan *WSUpdateNotification, ob *safeOrderBook, prices *SafePrices, balance *SafeBalance, quitWs <-chan bool) {
+func listenWSChan(msgCh <-chan *WSUpdateNotification,
+	ob *safeOrderBook,
+	prices *SafePrices,
+	balance *SafeBalance,
+	quitWs <-chan bool,
+	errs chan<- error) {
+
 	var (
 		orderBookNotification  orderBookUpdateNotification
 		spotWalletNotification WalletUpdateNotification
@@ -122,7 +128,7 @@ func listenWSChan(msgCh <-chan *WSUpdateNotification, ob *safeOrderBook, prices 
 				log.Printf("recv: Could NOT parse ws update notification to order book update notification %v\n", err)
 			}
 			ob.updateOrderBookFromWS(&orderBookNotification)
-			prices.updatePrices(ob)
+			prices.updatePrices(ob, errs)
 
 		case msg.Channel == "spot.balances":
 			err := json.Unmarshal(msg.Result, &spotWalletNotification)
@@ -208,7 +214,7 @@ func (c *GateClient) RunGate(prices *SafePrices, balance *SafeBalance, errs chan
 
 	// read msg
 	go c.readMessages(msgCh, errs, quitWs)
-	go listenWSChan(msgCh, &ob, prices, balance, quitWs)
+	go listenWSChan(msgCh, &ob, prices, balance, quitWs, errs)
 
 	if <-quitWs {
 		go c.CallGetOrderBookDetails(&ob, prices, errs)
