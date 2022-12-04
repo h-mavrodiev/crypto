@@ -9,10 +9,21 @@ const sleep = ms => new Promise(
   resolve => setTimeout(resolve, ms)
 );
 
+const rowStyle2 = (row) => {
+  const style = {};
+  style.border =  '2px solid #e06c75'
+  if (row.Platforms === "Gate to Stex") {
+    style.color = '#C678DD';
+  }
+  if (row.Platforms === "Stex to Gate") {
+    style.color = '#98C379';
+  }
+  return style;
+};
+
 const columns = [{
     dataField: 'Platforms',
     text: 'Platforms',
-    style: {color:'#e06c75'},
     headerStyle: {
       color: '#e06c75',
       border: '2px solid #e06c75'
@@ -20,7 +31,6 @@ const columns = [{
   },{
     dataField: 'Arbitrage',
     text: 'Arbitrage',
-    style: {color:'#e06c75'},
     headerStyle: {
       color: '#e06c75',
       border: '2px solid #e06c75'
@@ -44,10 +54,9 @@ function ArbitrageInfo(){
             keyField="Platforms" 
             data={ ArbitrageInfo } 
             condensed
-            striped 
             caption={<ArbitrageCaptionElement/>}
             columns={ columns }
-            rowStyle= {{border: '2px solid #e06c75' }}/>
+            rowStyle= { rowStyle2 }/>
 }
 
 export default ArbitrageInfo;

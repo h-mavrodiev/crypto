@@ -9,11 +9,22 @@ const sleep = ms => new Promise(
   resolve => setTimeout(resolve, ms)
 );
 
+const rowStyle2 = (row) => {
+  const style = {};
+  style.border =  '2px solid #e06c75';
+  if (row.id === "Gate") {
+    style.color = '#C678DD';
+  }
+  if (row.Platform === "Stex") {
+    style.color = '#98C379';
+  }
+  return style;
+};
+
 const columns = [
     {
 dataField:"Platform", 
 text:"Platform",
-style: {color:'#E06C75'},
 headerStyle: {
     color: '#E06C75',
     border: '2px solid #E06C75'
@@ -22,7 +33,6 @@ headerStyle: {
     {
   dataField:"USDT", 
   text:"USDT",
-  style: {color:'#E06C75'},
   headerStyle: {
       color: '#E06C75',
       border: '2px solid #E06C75'
@@ -31,7 +41,6 @@ headerStyle: {
   {
   dataField:"ETH", 
   text:"ETH",
-  style: {color:'#E06C75'},
   headerStyle: {
       color: '#E06C75',
       border: '2px solid #E06C75'
@@ -40,7 +49,6 @@ headerStyle: {
   {
   dataField:"BTC", 
   text:"BTC",
-  style: {color:'#E06C75'},
   headerStyle: {
       color: '#E06C75',
       border: '2px solid #E06C75'
@@ -62,13 +70,12 @@ function BalanceInfo() {
 
     return <BootstrapTable
             bootstrap4 
-            keyField="USDT"
+            keyField="Platform"
             data={ BalanceInfo } 
             condensed
-            striped 
             caption={<BalanceCaptionElement/>} 
             columns={ columns }
-            rowStyle= {{border: '2px solid #E06C75'}}/>
+            rowStyle= { rowStyle2 }/>
 }
 
 export default BalanceInfo;

@@ -9,69 +9,77 @@ const sleep = ms => new Promise(
   resolve => setTimeout(resolve, ms)
 );
 
+const rowStyle2 = (row) => {
+  const style = {};
+  style.border =  '2px solid #e06c75';
+  
+  if (row.Platform === 'Gate') {
+    style.color = '#C678DD';
+  }
+  
+  if (row.Platform === 'Stex') {
+    style.color = '#98C379';
+  }
+  return style;
+};
+
 const columns = [{
   dataField: 'Platform',
   text: 'Platform',
-  style: {color:'#c678dd'},
   headerStyle: {
-    color: '#c678dd',
-    border: '2px solid #c678dd'
+    color: '#e06c75',
+    border: '2px solid #e06c75'
   }
 },{
     dataField: 'Sells',
     text: 'Sells',
-    style: {color:'#c678dd'},
     headerStyle: {
-      color: '#c678dd',
-      border: '2px solid #c678dd'
+      color: '#e06c75',
+      border: '2px solid #e06c75'
     }
   },{
     dataField: 'SellsVolume',
     text: 'Sells Volume',
-    style: {color:'#c678dd'},
     headerStyle: {
-      color: '#c678dd',
-      border: '2px solid #c678dd'
+      color: '#e06c75',
+      border: '2px solid #e06c75'
     }
   },  {
     dataField: 'Buys',
     text: 'Buys',
-    style: {color:'#c678dd'},
     headerStyle: {
-      color: '#c678dd',
-      border: '2px solid #c678dd'
+      color: '#e06c75',
+      border: '2px solid #e06c75'
     }
   }, {
     dataField: 'BuysVolume',
     text: 'Buys Volume',
-    style: {color:'#c678dd'},
     headerStyle: {
-      color: '#c678dd',
-      border: '2px solid #c678dd'
+      color: '#e06c75',
+      border: '2px solid #e06c75'
     }
   }];
 
 // Use effect - effect hook
 function PriceInfo(){
-    async function loadGateInfo() {
+    async function loadPricesInfo() {
       await sleep(2000)
       fetch("http://localhost:8080/prices")
       .then((response) => response.json())
-      .then((data) => setGateInfo(data));
+      .then((data) => setPricesInfo(data));
     }
 
-    const [gateInfo, setGateInfo] = useState([]);
-    useEffect(() => {loadGateInfo()});
+    const [pricesInfo, setPricesInfo] = useState([]);
+    useEffect(() => {loadPricesInfo()});
 
     return <BootstrapTable
             bootstrap4 
-            keyField="Sells" 
-            data={ gateInfo } 
+            keyField="Platform" 
+            data={ pricesInfo }
             condensed
-            striped 
             caption={<PricesCaptionElement/>}
             columns={ columns }
-            rowStyle= {{border: '2px solid #c678dd'}}/>
+            rowStyle= { rowStyle2 }/>
 }
 
 export default PriceInfo;
