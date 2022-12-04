@@ -28,7 +28,7 @@ func (c *StexClient) GetCurrencyPairDetails(pair int, ch chan<- interface{}) err
 	return nil
 }
 
-func (c *StexClient) GetOrderBookDetails(o *safeOrderBook, p *SafePrices) error {
+func (c *StexClient) GetOrderBookDetails(o *safeOrderBook, p *SafePrices, errs chan error) error {
 	// ETH-USDT code is 407
 
 	resource := "/orderbook" + "/" + strconv.Itoa(c.Pair)
@@ -44,7 +44,7 @@ func (c *StexClient) GetOrderBookDetails(o *safeOrderBook, p *SafePrices) error 
 	}
 
 	o.updateOrderBookFromHTTP(&res)
-	p.updatePrices(o)
+	p.updatePrices(o, errs)
 	return nil
 }
 
@@ -54,7 +54,7 @@ func (c *StexClient) CallStexGetOrderBookDetails(o *safeOrderBook, p *SafePrices
 		// ETH-USDT code is 407
 		h, _ := time.ParseDuration(httpOBDelayTime)
 		time.Sleep(h)
-		err := c.GetOrderBookDetails(o, p)
+		err := c.GetOrderBookDetails(o, p, errs)
 		if err != nil {
 			counter++
 			errs <- fmt.Errorf("HTTP Call STEX OB details fail: %v", err)
